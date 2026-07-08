@@ -28,8 +28,8 @@ export default function NumbersTab() {
     if (!activeWorkspace) return;
     setIsLoadingOwned(true);
     try {
-      const response = await api.get<{ data: any[] }>('/phone-numbers');
-      setOwnedNumbers(response.data);
+      const response = await api.get<any[]>('/phone-numbers');
+      setOwnedNumbers(response);
     } catch (err) {
       console.error('Failed to load owned numbers:', err);
     } finally {
@@ -59,10 +59,10 @@ export default function NumbersTab() {
     if (!activeWorkspace) return;
     setIsSearching(true);
     try {
-      const response = await api.get<{ data: any[] }>(
+      const response = await api.get<any[]>(
         `/phone-numbers/search?country_code=US&type=${numType}&area_code=${areaCode}`
       );
-      setSearchResults(response.data);
+      setSearchResults(response);
     } catch (err) {
       console.error('Failed to search numbers:', err);
     } finally {

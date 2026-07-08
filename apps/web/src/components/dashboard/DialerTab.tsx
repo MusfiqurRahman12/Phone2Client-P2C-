@@ -30,8 +30,8 @@ export default function DialerTab({ socket }: { socket: any }) {
     async function loadNumbers() {
       if (!activeWorkspace) return;
       try {
-        const response = await api.get<{ data: any[] }>('/phone-numbers');
-        const activeNums = response.data.filter((n) => n.status === 'ACTIVE');
+        const response = await api.get<any[]>('/phone-numbers');
+        const activeNums = response.filter((n) => n.status === 'ACTIVE');
         setOwnedNumbers(activeNums);
         if (activeNums.length > 0) {
           setSelectedNumberId(activeNums[0].id);
