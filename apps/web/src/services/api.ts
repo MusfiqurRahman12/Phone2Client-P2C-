@@ -42,7 +42,8 @@ class ApiService {
       config.body = JSON.stringify(options.body);
     }
 
-    const response = await fetch(`/api/v1${path}`, config);
+    const baseUrl = import.meta.env.VITE_API_URL || '/api/v1';
+    const response = await fetch(`${baseUrl}${path}`, config);
 
     if (response.status === 204) {
       return {} as T;
