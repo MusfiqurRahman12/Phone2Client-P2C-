@@ -1,0 +1,18 @@
+{
+  "name": "phone2client",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Phone2Client (P2C) Multi-Tenant Telephony Platform",
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "db:migrate": "pnpm --filter api db:migrate",
+    "db:generate": "pnpm --filter api db:generate",
+    "db:studio": "pnpm --filter api db:studio"
+  },
+  "devDependencies": {
+    "turbo": "^2.0.0"
+  },
+  "packageManager": "pnpm@11.10.0"
+}
