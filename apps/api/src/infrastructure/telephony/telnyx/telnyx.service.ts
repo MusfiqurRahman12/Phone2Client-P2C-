@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, BadRequestException } from '@nestjs/common';
 import { ITelephonyProvider } from '../../../common/interfaces/telephony-provider.interface';
 import {
   AvailableNumber,
@@ -283,9 +283,13 @@ export class TelnyxService implements ITelephonyProvider {
       return {
         providerMessageId: response.data.id,
       };
-    } catch (error) {
-      this.logger.error(`Failed to send SMS from ${params.from} to ${params.to}`, error);
-      throw error;
+    } catch (error: any) {
+      const telnyxErrors = error?.raw?.errors || error?.errors;
+      const errorMsg = telnyxErrors 
+        ? JSON.stringify(telnyxErrors) 
+        : error?.message || 'Unknown Telnyx error';
+      this.logger.error(`Failed to send SMS from ${params.from} to ${params.to}: ${errorMsg}`, error);
+      throw new BadRequestException(`Telnyx SMS failed: ${errorMsg}`);
     }
   }
 
