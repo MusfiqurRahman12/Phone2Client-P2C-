@@ -97,17 +97,30 @@ export class WebhookProcessor extends WorkerHost {
   private async handleCallAnswered(event: NormalizedWebhookEvent) {
     if (!event.providerCallId) return;
 
-    const callLog = await this.prisma.callLog.findUnique({
+    // Try exact match first, then fall back to most recent active call
+    let callLog = await this.prisma.callLog.findFirst({
       where: { providerCallId: event.providerCallId },
     });
 
+    if (!callLog && event.toNumber) {
+      // WebRTC SDK calls may not have stored providerCallId yet — match by number + active status
+      callLog = await this.prisma.callLog.findFirst({
+        where: {
+          toNumber: event.toNumber,
+          status: { in: ['INITIATED', 'RINGING'] },
+        },
+        orderBy: { startedAt: 'desc' },
+      });
+    }
+
     if (!callLog) return;
 
-    const updated = await this.prisma.callLog.update({
+    await this.prisma.callLog.update({
       where: { id: callLog.id },
       data: {
         status: 'ANSWERED',
         answeredAt: new Date(),
+        providerCallId: callLog.providerCallId || event.providerCallId,
       },
     });
 
@@ -121,9 +134,20 @@ export class WebhookProcessor extends WorkerHost {
   private async handleCallHangup(event: NormalizedWebhookEvent) {
     if (!event.providerCallId) return;
 
-    const callLog = await this.prisma.callLog.findUnique({
+    // Try exact match first, then fall back to most recent active call
+    let callLog = await this.prisma.callLog.findFirst({
       where: { providerCallId: event.providerCallId },
     });
+
+    if (!callLog) {
+      // WebRTC SDK calls may not have stored providerCallId yet
+      callLog = await this.prisma.callLog.findFirst({
+        where: {
+          status: { in: ['INITIATED', 'RINGING', 'ANSWERED'] },
+        },
+        orderBy: { startedAt: 'desc' },
+      });
+    }
 
     if (!callLog) return;
 
@@ -137,6 +161,7 @@ export class WebhookProcessor extends WorkerHost {
         status: callLog.answeredAt ? 'COMPLETED' : 'MISSED',
         endedAt,
         durationSeconds: event.callDurationSeconds || durationSeconds,
+        providerCallId: callLog.providerCallId || event.providerCallId,
       },
     });
 

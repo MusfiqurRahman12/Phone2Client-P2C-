@@ -89,6 +89,17 @@ export default function DialerTab({ socket }: { socket: any }) {
     };
   }, [socket, fetchCallHistory]);
 
+  // Refresh history when a call ends (give backend 2s to process the webhook)
+  const prevActiveCallRef = useRef<any>(null);
+  useEffect(() => {
+    if (prevActiveCallRef.current && !activeCall) {
+      // Call just ended — wait for webhook processor then refresh
+      setTimeout(() => fetchCallHistory(), 2000);
+      setTimeout(() => fetchCallHistory(), 5000); // second attempt in case Render is slow
+    }
+    prevActiveCallRef.current = activeCall;
+  }, [activeCall, fetchCallHistory]);
+
   const longPressTimer = useRef<any>(null);
   const isLongPress = useRef(false);
 
@@ -380,8 +391,11 @@ export default function DialerTab({ socket }: { socket: any }) {
                 <Loader2 className="animate-spin" size={24} />
               </div>
             ) : callHistory.length === 0 ? (
-              <div style={{ display: 'flex', justifyContent: 'center', padding: '24px', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-                No recent calls found.
+              <div style={{ padding: '24px 16px', color: 'var(--text-muted)', fontSize: '0.85rem', textAlign: 'center', lineHeight: '1.8' }}>
+                <div style={{ fontSize: '2rem', marginBottom: '8px' }}>📋</div>
+                <div style={{ fontWeight: 600, marginBottom: '4px', color: 'var(--text-secondary)' }}>No calls yet</div>
+                <div>Calls appear here after they end.<br />
+                History refreshes automatically after each call.</div>
               </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
