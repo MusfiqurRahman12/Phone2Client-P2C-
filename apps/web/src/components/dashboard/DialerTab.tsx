@@ -18,6 +18,7 @@ export default function DialerTab({ socket }: { socket: any }) {
 
   const {
     isConnecting,
+    micPermission,
     activeCall,
     isMuted,
     dial,
@@ -131,6 +132,26 @@ export default function DialerTab({ socket }: { socket: any }) {
       
       {/* Dialer Control Center */}
       <div className="glass-panel" style={{ padding: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+        
+        {/* Microphone permission warning */}
+        {micPermission === 'denied' && (
+          <div style={{
+            width: '100%',
+            maxWidth: '320px',
+            marginBottom: '20px',
+            padding: '12px 16px',
+            background: 'rgba(239, 68, 68, 0.12)',
+            border: '1px solid rgba(239, 68, 68, 0.4)',
+            borderRadius: 'var(--radius-sm)',
+            fontSize: '0.82rem',
+            color: '#f87171',
+            textAlign: 'center',
+            lineHeight: '1.5'
+          }}>
+            🎙️ <strong>Microphone access denied.</strong><br />
+            Please click the 🔒 lock icon in your browser address bar and allow microphone access, then refresh the page.
+          </div>
+        )}
         
         {/* Caller ID selector */}
         <div style={{ width: '100%', maxWidth: '280px', marginBottom: '24px' }}>

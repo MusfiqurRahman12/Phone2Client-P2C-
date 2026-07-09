@@ -23,9 +23,11 @@ export function useTelnyxWebRTC(onCallEnded?: () => void) {
   const [activeCall, setActiveCall] = useState<CallSession | null>(null);
   const [isMuted, setIsMuted] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
+  const [micPermission, setMicPermission] = useState<'pending' | 'granted' | 'denied'>('pending');
   
   const telnyxRtcRef = useRef<any>(null);
   const activeCallRef = useRef<any>(null);
+  const micStreamRef = useRef<MediaStream | null>(null);
 
   // Initialize WebRTC client
   useEffect(() => {
@@ -34,6 +36,20 @@ export function useTelnyxWebRTC(onCallEnded?: () => void) {
     async function setupClient() {
       setIsConnecting(true);
       try {
+        // 0. Request microphone permission immediately so browser prompt appears on page load
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          micStreamRef.current = stream;
+          setMicPermission('granted');
+        } catch (permErr) {
+          console.warn('Microphone permission denied or unavailable:', permErr);
+          setMicPermission('denied');
+          // Fall back to mock mode if mic is unavailable
+          setClient({ isMock: true });
+          setIsConnecting(false);
+          return;
+        }
+
         // 1. Fetch WebRTC token from our backend
         const data = await api.post<{ token: string }>('/calls/token');
 
@@ -117,6 +133,11 @@ export function useTelnyxWebRTC(onCallEnded?: () => void) {
 
     return () => {
       active = false;
+      // Stop the mic stream held for permission
+      if (micStreamRef.current) {
+        micStreamRef.current.getTracks().forEach((t) => t.stop());
+        micStreamRef.current = null;
+      }
       if (telnyxRtcRef.current) {
         telnyxRtcRef.current.disconnect();
       }
@@ -229,6 +250,7 @@ export function useTelnyxWebRTC(onCallEnded?: () => void) {
 
   return {
     isConnecting,
+    micPermission,
     activeCall,
     isMuted,
     dial,
