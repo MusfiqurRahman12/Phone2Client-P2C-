@@ -1,9 +1,9 @@
 // apps/web/src/components/dashboard/DialerTab.tsx
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTelnyxWebRTC } from '../../hooks/useTelnyxWebRTC';
 import { api } from '../../services/api';
-import { Phone, PhoneOff, MicOff, Mic, Loader2, Volume2 } from 'lucide-react';
+import { Phone, PhoneOff, MicOff, Mic, Loader2, Volume2, History, ArrowUpRight, ArrowDownLeft, RefreshCw } from 'lucide-react';
 import { useAuthStore } from '../../stores/auth.store';
 
 export default function DialerTab({ socket }: { socket: any }) {
@@ -12,6 +12,9 @@ export default function DialerTab({ socket }: { socket: any }) {
   const [selectedNumberId, setSelectedNumberId] = useState('');
   const [dialNumber, setDialNumber] = useState('');
   const [realTimeWebhookLogs, setRealTimeWebhookLogs] = useState<string[]>([]);
+  const [rightTab, setRightTab] = useState<'history' | 'webhooks'>('history');
+  const [callHistory, setCallHistory] = useState<any[]>([]);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
 
   const {
     isConnecting,
@@ -25,7 +28,20 @@ export default function DialerTab({ socket }: { socket: any }) {
     triggerMockInboundCall
   } = useTelnyxWebRTC();
 
-  // Load owned numbers for Caller ID selection
+  const fetchCallHistory = useCallback(async () => {
+    if (!activeWorkspace) return;
+    setIsLoadingHistory(true);
+    try {
+      const response = await api.get<any[]>('/calls/history');
+      setCallHistory(response);
+    } catch (err) {
+      console.error('Failed to load call history:', err);
+    } finally {
+      setIsLoadingHistory(false);
+    }
+  }, [activeWorkspace]);
+
+  // Load owned numbers for Caller ID selection and call history
   useEffect(() => {
     async function loadNumbers() {
       if (!activeWorkspace) return;
@@ -41,7 +57,8 @@ export default function DialerTab({ socket }: { socket: any }) {
       }
     }
     loadNumbers();
-  }, [activeWorkspace]);
+    fetchCallHistory();
+  }, [activeWorkspace, fetchCallHistory]);
 
   // Bind real-time webhook event log listeners to display DX logs
   useEffect(() => {
@@ -56,19 +73,44 @@ export default function DialerTab({ socket }: { socket: any }) {
 
     socket.on('call:incoming', (data: any) => {
       logWebhook(`Incoming Call Alert: From ${data.fromNumber} to ${data.toNumber}`);
+      fetchCallHistory();
     });
 
     socket.on('call:state-change', (data: any) => {
-      logWebhook(`Call State Change: Session ${data.providerCallId.substring(0, 8)} is now ${data.status}`);
+      logWebhook(`Call State Change: Session ${data.providerCallId?.substring(0, 8) || ''} is now ${data.status}`);
+      fetchCallHistory();
     });
 
     return () => {
       socket.off('call:incoming');
       socket.off('call:state-change');
     };
-  }, [socket]);
+  }, [socket, fetchCallHistory]);
 
-  const handleKeyPress = (char: string) => {
+  const longPressTimer = useRef<any>(null);
+  const isLongPress = useRef(false);
+
+  const handleButtonPressStart = (char: string) => {
+    isLongPress.current = false;
+    if (char === '0') {
+      longPressTimer.current = setTimeout(() => {
+        isLongPress.current = true;
+        setDialNumber((prev) => prev + '+');
+      }, 600); // 600ms hold
+    }
+  };
+
+  const handleButtonPressEnd = (char: string) => {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
+    
+    if (isLongPress.current) {
+      isLongPress.current = false;
+      return;
+    }
+
     setDialNumber((prev) => prev + char);
     if (activeCall && activeCall.status === 'CONNECTED') {
       sendDTMF(char);
@@ -183,7 +225,16 @@ export default function DialerTab({ socket }: { socket: any }) {
                 {row.map((char) => (
                   <button
                     key={char}
-                    onClick={() => handleKeyPress(char)}
+                    onMouseDown={() => handleButtonPressStart(char)}
+                    onMouseUp={() => handleButtonPressEnd(char)}
+                    onMouseLeave={() => {
+                      if (longPressTimer.current) {
+                        clearTimeout(longPressTimer.current);
+                        longPressTimer.current = null;
+                      }
+                    }}
+                    onTouchStart={() => handleButtonPressStart(char)}
+                    onTouchEnd={() => handleButtonPressEnd(char)}
                     style={{
                       flex: 1,
                       height: '54px',
@@ -194,12 +245,16 @@ export default function DialerTab({ socket }: { socket: any }) {
                       fontSize: '1.2rem',
                       fontWeight: 500,
                       cursor: 'pointer',
-                      transition: 'var(--transition-fast)'
+                      transition: 'var(--transition-fast)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      lineHeight: '1'
                     }}
-                    onMouseDown={(e) => { e.currentTarget.style.background = 'var(--bg-tertiary)'; }}
-                    onMouseUp={(e) => { e.currentTarget.style.background = 'var(--bg-secondary)'; }}
                   >
-                    {char}
+                    <div>{char}</div>
+                    {char === '0' && <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', marginTop: '2px' }}>+</div>}
                   </button>
                 ))}
               </div>
@@ -232,32 +287,181 @@ export default function DialerTab({ socket }: { socket: any }) {
         )}
       </div>
 
-      {/* Right Column: DX Real-Time Webhook Logs */}
-      <div className="glass-panel" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-        <h3 style={{ fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <Volume2 size={18} color="var(--accent-secondary)" />
-          Real-time Event Logs (Webhooks)
-        </h3>
-        <div style={{
-          flex: 1,
-          fontFamily: 'monospace',
-          fontSize: '0.8rem',
-          padding: '16px',
-          background: 'rgba(0,0,0,0.3)',
-          border: '1px solid var(--border-color)',
-          borderRadius: 'var(--radius-sm)',
-          overflowY: 'auto',
-          color: 'var(--color-success)',
-          lineHeight: '1.6'
-        }}>
-          {realTimeWebhookLogs.length === 0 ? (
-            <div style={{ color: 'var(--text-muted)' }}>Waiting for call actions or webhook events...</div>
-          ) : (
-            realTimeWebhookLogs.map((log, idx) => (
-              <div key={idx} style={{ marginBottom: '8px', borderBottom: '1px solid rgba(255,255,255,0.02)', paddingBottom: '4px' }}>
-                {log}
+      {/* Right Column: Call History & Webhook Logs */}
+      <div className="glass-panel" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px', height: '100%' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--border-color)', paddingBottom: '12px' }}>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button 
+              onClick={() => setRightTab('history')}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: rightTab === 'history' ? 'var(--accent-primary)' : 'var(--text-secondary)',
+                fontWeight: 600,
+                fontSize: '1rem',
+                cursor: 'pointer',
+                padding: '4px 8px',
+                borderBottom: rightTab === 'history' ? '2px solid var(--accent-primary)' : 'none',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px'
+              }}
+            >
+              <History size={16} />
+              Call History
+            </button>
+            <button 
+              onClick={() => setRightTab('webhooks')}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: rightTab === 'webhooks' ? 'var(--accent-primary)' : 'var(--text-secondary)',
+                fontWeight: 600,
+                fontSize: '1rem',
+                cursor: 'pointer',
+                padding: '4px 8px',
+                borderBottom: rightTab === 'webhooks' ? '2px solid var(--accent-primary)' : 'none',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px'
+              }}
+            >
+              <Volume2 size={16} />
+              Real-time Logs
+            </button>
+          </div>
+          {rightTab === 'history' && (
+            <button 
+              onClick={fetchCallHistory} 
+              disabled={isLoadingHistory}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: 'var(--text-secondary)',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                padding: '4px'
+              }}
+            >
+              <RefreshCw size={14} className={isLoadingHistory ? 'animate-spin' : ''} />
+            </button>
+          )}
+        </div>
+
+        <div style={{ flex: 1, overflowY: 'auto' }}>
+          {rightTab === 'history' ? (
+            isLoadingHistory && callHistory.length === 0 ? (
+              <div style={{ display: 'flex', justifyContent: 'center', padding: '24px', color: 'var(--text-muted)' }}>
+                <Loader2 className="animate-spin" size={24} />
               </div>
-            ))
+            ) : callHistory.length === 0 ? (
+              <div style={{ display: 'flex', justifyContent: 'center', padding: '24px', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                No recent calls found.
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                {callHistory.map((call) => {
+                  const isOutbound = call.direction === 'OUTBOUND';
+                  const displayNum = isOutbound ? call.toNumber : call.fromNumber;
+                  const dateStr = new Date(call.startedAt).toLocaleString(undefined, {
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  });
+                  return (
+                    <div 
+                      key={call.id} 
+                      style={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'space-between', 
+                        padding: '12px 16px', 
+                        background: 'rgba(255,255,255,0.02)', 
+                        border: '1px solid var(--border-color)', 
+                        borderRadius: 'var(--radius-sm)',
+                        transition: 'var(--transition-fast)'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <div style={{
+                          width: '32px',
+                          height: '32px',
+                          borderRadius: 'var(--radius-round)',
+                          background: isOutbound ? 'rgba(59, 130, 246, 0.1)' : 'rgba(16, 185, 129, 0.1)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          color: isOutbound ? 'var(--color-info)' : 'var(--color-success)'
+                        }}>
+                          {isOutbound ? <ArrowUpRight size={16} /> : <ArrowDownLeft size={16} />}
+                        </div>
+                        <div>
+                          <div style={{ fontWeight: 600, fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            {displayNum}
+                            <button 
+                              onClick={() => setDialNumber(displayNum)}
+                              style={{
+                                background: 'none',
+                                border: 'none',
+                                color: 'var(--accent-primary)',
+                                cursor: 'pointer',
+                                padding: '2px',
+                                display: 'inline-flex'
+                              }}
+                              title="Click to dial"
+                            >
+                              <Phone size={12} />
+                            </button>
+                          </div>
+                          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{dateStr}</div>
+                        </div>
+                      </div>
+                      <div style={{ textAlign: 'right' }}>
+                        <div style={{
+                          fontSize: '0.75rem',
+                          fontWeight: 600,
+                          color: call.status === 'COMPLETED' ? 'var(--text-secondary)' : 
+                                 call.status === 'MISSED' ? 'var(--color-error)' : 
+                                 call.status === 'CONNECTED' ? 'var(--color-success)' : 'var(--color-warning)'
+                        }}>
+                          {call.status}
+                        </div>
+                        {call.durationSeconds !== null && (
+                          <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                            {call.durationSeconds >= 60 ? `${Math.floor(call.durationSeconds / 60)}m ${call.durationSeconds % 60}s` : `${call.durationSeconds}s`}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )
+          ) : (
+            <div style={{
+              fontFamily: 'monospace',
+              fontSize: '0.8rem',
+              padding: '16px',
+              background: 'rgba(0,0,0,0.3)',
+              border: '1px solid var(--border-color)',
+              borderRadius: 'var(--radius-sm)',
+              color: 'var(--color-success)',
+              lineHeight: '1.6',
+              height: '350px',
+              overflowY: 'auto'
+            }}>
+              {realTimeWebhookLogs.length === 0 ? (
+                <div style={{ color: 'var(--text-muted)' }}>Waiting for call actions or webhook events...</div>
+              ) : (
+                realTimeWebhookLogs.map((log, idx) => (
+                  <div key={idx} style={{ marginBottom: '8px', borderBottom: '1px solid rgba(255,255,255,0.02)', paddingBottom: '4px' }}>
+                    {log}
+                  </div>
+                ))
+              )}
+            </div>
           )}
         </div>
       </div>

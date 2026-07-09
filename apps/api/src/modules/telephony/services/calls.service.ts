@@ -111,4 +111,15 @@ export class CallsService {
     const provider = await this.getProviderForWorkspace(workspaceId);
     await provider.hangupCall(callLog.providerCallId);
   }
+
+  async getCallHistory(workspaceId: string) {
+    return this.prisma.callLog.findMany({
+      where: { workspaceId },
+      orderBy: { startedAt: 'desc' },
+      take: 50,
+      include: {
+        phoneNumber: true,
+      },
+    });
+  }
 }

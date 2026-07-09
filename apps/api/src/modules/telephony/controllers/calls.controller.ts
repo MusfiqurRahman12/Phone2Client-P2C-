@@ -1,4 +1,4 @@
-import { Body, Controller, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { CallsService } from '../services/calls.service';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { TenantGuard } from '../../../common/guards/tenant.guard';
@@ -9,6 +9,11 @@ import { CurrentUser, AuthenticatedUser } from '../../../common/decorators/curre
 @UseGuards(JwtAuthGuard, TenantGuard)
 export class CallsController {
   constructor(private readonly callsService: CallsService) {}
+
+  @Get('history')
+  async getHistory(@CurrentWorkspaceId() workspaceId: string) {
+    return this.callsService.getCallHistory(workspaceId);
+  }
 
   @Post('token')
   async getToken(
