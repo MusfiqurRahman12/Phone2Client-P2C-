@@ -164,6 +164,19 @@ export class TelnyxService implements ITelephonyProvider {
       };
     } catch (error: any) {
       const telnyxErrors = error?.raw?.errors || error?.errors;
+      const isSipConnectionError = telnyxErrors?.some(
+        (e: any) => e.code === '10015' || (e.detail && e.detail.includes('connection_id')),
+      );
+
+      if (isSipConnectionError) {
+        this.logger.warn(
+          `TELNYX_CONNECTION_ID ${connectionId} is a SIP / Credential Connection, not a Call Control App. Bypassing calls.create and falling back to direct WebRTC dialing.`,
+        );
+        return {
+          providerCallId: `sip_call_${Math.random().toString(36).substring(7)}`,
+        };
+      }
+
       this.logger.error(
         `Failed to initiate Telnyx call from ${params.from} to ${params.to}: ${JSON.stringify(telnyxErrors || error?.message || error)}`,
       );
@@ -172,8 +185,8 @@ export class TelnyxService implements ITelephonyProvider {
   }
 
   async hangupCall(providerCallId: string): Promise<void> {
-    if (this.isMockKey() || providerCallId.startsWith('mock_')) {
-      this.logger.log(`Mock hangup of call ID: ${providerCallId}`);
+    if (this.isMockKey() || providerCallId.startsWith('mock_') || providerCallId.startsWith('sip_call_')) {
+      this.logger.log(`Mock or SIP hangup of call ID: ${providerCallId}`);
       return;
     }
 
