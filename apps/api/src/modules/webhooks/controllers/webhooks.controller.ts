@@ -11,6 +11,7 @@ export class WebhooksController {
   @HttpCode(HttpStatus.OK)
   async handleTelnyx(
     @Headers('telnyx-signature-ed25519') signature: string,
+    @Headers('telnyx-timestamp') timestamp: string,
     @Req() req: Request & { rawBody?: Buffer },
   ) {
     const rawBody = req.rawBody ? req.rawBody.toString('utf8') : JSON.stringify(req.body);
@@ -18,6 +19,7 @@ export class WebhooksController {
       TelephonyProvider.TELNYX,
       rawBody,
       signature,
+      timestamp,
     );
   }
 
@@ -32,6 +34,7 @@ export class WebhooksController {
       TelephonyProvider.TWILIO,
       rawBody,
       signature,
+      '', // Twilio uses HMAC, not Ed25519 timestamps
     );
   }
 }

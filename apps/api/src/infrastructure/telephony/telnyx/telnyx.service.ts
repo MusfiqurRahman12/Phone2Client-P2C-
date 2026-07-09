@@ -267,15 +267,23 @@ export class TelnyxService implements ITelephonyProvider {
     }
   }
 
-  verifyWebhookSignature(rawBody: string, signature: string, secret: string): boolean {
+  verifyWebhookSignature(rawBody: string, signature: string, timestamp: string, publicKey: string): boolean {
     if (this.isMockKey()) {
       // In local dev without keys, always return true to make testing simple
       return true;
     }
 
+    if (!signature || !timestamp || !publicKey) {
+      this.logger.warn('Missing signature, timestamp, or public key for webhook verification');
+      return false;
+    }
+
     try {
-      // Signature is Ed25519; Telnyx SDK handles it internally
-      return Telnyx.Webhooks.signature.verify(rawBody, signature, secret);
+      // Telnyx uses Ed25519 public key cryptography for webhook verification.
+      // The SDK's constructEvent method verifies the signature using the public key + timestamp.
+      const Telnyx = require('telnyx');
+      Telnyx.Webhooks.signature.verifySignature(rawBody, signature, timestamp, publicKey);
+      return true;
     } catch (error) {
       this.logger.error('Failed to verify Telnyx webhook signature', error);
       return false;

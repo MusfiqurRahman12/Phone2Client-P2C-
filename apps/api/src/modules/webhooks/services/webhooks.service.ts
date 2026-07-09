@@ -15,23 +15,23 @@ export class WebhooksService {
     @InjectQueue('provider-webhooks') private readonly webhookQueue: Queue,
   ) {}
 
-  async handleWebhook(provider: TelephonyProvider, rawBody: string, signature: string) {
+  async handleWebhook(provider: TelephonyProvider, rawBody: string, signature: string, timestamp: string) {
     // 1. Resolve provider adapter
     const adapter = this.providerFactory.forWorkspace(provider);
 
-    // 2. Verify signature (in production mode, using appropriate webhook secret)
-    const secret = provider === TelephonyProvider.TELNYX
-      ? process.env.TELNYX_WEBHOOK_SECRET
+    // 2. Verify signature using Ed25519 public key (Telnyx) or auth token (Twilio)
+    const publicKeyOrSecret = provider === TelephonyProvider.TELNYX
+      ? process.env.TELNYX_PUBLIC_KEY
       : process.env.TWILIO_AUTH_TOKEN;
 
-    if (secret && signature) {
-      const isValid = adapter.verifyWebhookSignature(rawBody, signature, secret);
+    if (publicKeyOrSecret && signature) {
+      const isValid = adapter.verifyWebhookSignature(rawBody, signature, timestamp, publicKeyOrSecret);
       if (!isValid) {
         this.logger.warn(`Signature verification failed for provider ${provider}`);
         throw new UnauthorizedException('Invalid signature');
       }
     } else {
-      this.logger.warn(`Webhook signature check skipped: missing secret or signature header`);
+      this.logger.warn(`Webhook signature check skipped: missing public key/secret or signature header`);
     }
 
     // 3. Parse payload

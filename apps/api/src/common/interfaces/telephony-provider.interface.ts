@@ -29,6 +29,6 @@ export interface ITelephonyProvider {
   sendSms(params: SendSmsParams): Promise<MessageResult>;
 
   // Webhooks
-  verifyWebhookSignature(rawBody: string, signature: string, secret: string): boolean;
+  verifyWebhookSignature(rawBody: string, signature: string, timestamp: string, publicKey: string): boolean;
   parseWebhookEvent(rawPayload: any): NormalizedWebhookEvent;
 }
