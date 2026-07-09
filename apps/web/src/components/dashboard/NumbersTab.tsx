@@ -117,7 +117,7 @@ export default function NumbersTab() {
   };
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', height: '100%', overflowY: 'auto', padding: '24px' }}>
+    <div className="numbers-grid">
       
       {/* Left Column: Search & Buy */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>

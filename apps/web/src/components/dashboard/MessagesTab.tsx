@@ -167,7 +167,7 @@ export default function MessagesTab({ socket }: { socket: any }) {
   };
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '320px 1fr', height: '100%' }}>
+    <div className="messages-grid">
       
       {/* Sidebar: Conversations */}
       <div style={{ borderRight: '1px solid rgba(255,255,255,0.06)', display: 'flex', flexDirection: 'column', background: 'rgba(255,255,255,0.01)' }}>

@@ -1,13 +1,12 @@
 // apps/web/src/components/dashboard/DialerTab.tsx
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useTelnyxWebRTC } from '../../hooks/useTelnyxWebRTC';
 import { api } from '../../services/api';
 import { Phone, PhoneOff, MicOff, Mic, Loader2, Volume2, History, RefreshCw } from 'lucide-react';
 import { useAuthStore } from '../../stores/auth.store';
 import { playHaptic } from '../../utils/callSounds';
 
-export default function DialerTab({ socket }: { socket: any }) {
+export default function DialerTab({ socket, webrtc }: { socket: any; webrtc: any }) {
   const activeWorkspace = useAuthStore((state) => state.activeWorkspace);
   const [ownedNumbers, setOwnedNumbers] = useState<any[]>([]);
   const [selectedNumberId, setSelectedNumberId] = useState('');
@@ -28,7 +27,7 @@ export default function DialerTab({ socket }: { socket: any }) {
     toggleMute,
     sendDTMF,
     triggerMockInboundCall
-  } = useTelnyxWebRTC();
+  } = webrtc;
 
   const fetchCallHistory = useCallback(async () => {
     if (!activeWorkspace) return;
@@ -154,10 +153,10 @@ export default function DialerTab({ socket }: { socket: any }) {
   };
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '20px', height: '100%', padding: '24px' }}>
+    <div className="dialer-grid">
       
       {/* Dialer Control Center */}
-      <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+      <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
         
         {/* Microphone permission warning */}
         {micPermission === 'denied' && (
@@ -412,7 +411,7 @@ export default function DialerTab({ socket }: { socket: any }) {
       </div>
 
       {/* Right Column: Call History & Webhook Logs */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', height: '100%', borderLeft: '1px solid rgba(255,255,255,0.06)', paddingLeft: '24px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', borderLeft: '1px solid rgba(255,255,255,0.06)', paddingLeft: '24px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '12px' }}>
           <div style={{ display: 'flex', gap: '8px' }}>
             <button 
