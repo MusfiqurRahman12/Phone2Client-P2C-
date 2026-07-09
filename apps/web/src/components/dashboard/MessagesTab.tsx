@@ -167,20 +167,20 @@ export default function MessagesTab({ socket }: { socket: any }) {
   };
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '320px 1fr', height: '100%', borderTop: '1px solid var(--border-color)' }}>
+    <div style={{ display: 'grid', gridTemplateColumns: '320px 1fr', height: '100%' }}>
       
       {/* Sidebar: Conversations */}
-      <div style={{ borderRight: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', background: 'rgba(0,0,0,0.1)' }}>
+      <div style={{ borderRight: '1px solid rgba(255,255,255,0.06)', display: 'flex', flexDirection: 'column', background: 'rgba(255,255,255,0.01)' }}>
         
         {/* Create new thread control */}
-        <div style={{ padding: '16px', borderBottom: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <div style={{ padding: '20px', borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
           <div>
-            <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '4px' }}>Sender Line</label>
+            <label style={{ display: 'block', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-secondary)', marginBottom: '6px' }}>Sender Line</label>
             <select 
               className="form-input" 
               value={selectedNumberId} 
               onChange={(e) => setSelectedNumberId(e.target.value)}
-              style={{ fontSize: '0.85rem', padding: '8px 12px' }}
+              style={{ fontSize: '0.85rem', padding: '8px 12px', background: 'rgba(255, 255, 255, 0.02)', borderColor: 'rgba(255, 255, 255, 0.05)' }}
             >
               {ownedNumbers.map((n) => (
                 <option key={n.id} value={n.id}>{n.number} ({n.friendlyName})</option>
@@ -189,7 +189,7 @@ export default function MessagesTab({ socket }: { socket: any }) {
           </div>
           
           <div>
-            <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '4px' }}>New Chat Number</label>
+            <label style={{ display: 'block', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-secondary)', marginBottom: '6px' }}>New Chat Number</label>
             <input
               type="text"
               placeholder="+15559876543"
@@ -199,7 +199,7 @@ export default function MessagesTab({ socket }: { socket: any }) {
                 setNewContactNumber(e.target.value);
                 setActiveConversationId(null); // deselect current thread
               }}
-              style={{ fontSize: '0.85rem', padding: '8px 12px' }}
+              style={{ fontSize: '0.85rem', padding: '8px 12px', background: 'rgba(255, 255, 255, 0.02)', borderColor: 'rgba(255, 255, 255, 0.05)' }}
             />
           </div>
         </div>
@@ -208,10 +208,10 @@ export default function MessagesTab({ socket }: { socket: any }) {
         <div style={{ flex: 1, overflowY: 'auto' }}>
           {isLoadingConversations ? (
             <div style={{ display: 'flex', justifyContent: 'center', marginTop: '32px' }}>
-              <Loader2 className="animate-spin" size={20} color="var(--accent-primary)" />
+              <Loader2 className="animate-spin" size={16} color="var(--accent-secondary)" />
             </div>
           ) : conversations.length === 0 ? (
-            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '32px', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '32px', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
               No chats found.
             </div>
           ) : (
@@ -223,28 +223,38 @@ export default function MessagesTab({ socket }: { socket: any }) {
                   setActiveConversationId(c.id);
                 }}
                 style={{
-                  padding: '16px',
-                  borderBottom: '1px solid var(--border-color)',
+                  padding: '16px 20px',
+                  borderBottom: '1px solid rgba(255,255,255,0.03)',
                   cursor: 'pointer',
-                  background: activeConversationId === c.id ? 'rgba(99, 102, 241, 0.1)' : 'transparent',
-                  borderLeft: activeConversationId === c.id ? '3px solid var(--accent-primary)' : 'none',
+                  background: activeConversationId === c.id ? 'rgba(255, 255, 255, 0.03)' : 'transparent',
                   transition: 'var(--transition-fast)'
+                }}
+                onMouseEnter={(e) => {
+                  if (activeConversationId !== c.id) {
+                    e.currentTarget.style.background = 'rgba(255,255,255,0.015)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (activeConversationId !== c.id) {
+                    e.currentTarget.style.background = 'transparent';
+                  }
                 }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                  <span style={{ fontWeight: 600, fontSize: '0.95rem' }}>{c.externalNumber}</span>
+                  <span style={{ fontWeight: 700, fontSize: '0.9rem', color: activeConversationId === c.id ? 'var(--accent-secondary)' : 'var(--text-primary)' }}>{c.externalNumber}</span>
                   {c.unreadCount > 0 && (
                     <span style={{
                       background: 'var(--accent-primary)',
                       color: '#fff',
-                      fontSize: '0.7rem',
+                      fontSize: '0.65rem',
                       fontWeight: 'bold',
                       padding: '2px 6px',
-                      borderRadius: 'var(--radius-round)'
+                      borderRadius: 'var(--radius-round)',
+                      boxShadow: '0 0 8px var(--accent-glow)'
                     }}>{c.unreadCount}</span>
                   )}
                 </div>
-                <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   {c.lastMessageBody || 'Empty conversation'}
                 </div>
                 <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginTop: '4px', textAlign: 'right' }}>
@@ -257,21 +267,21 @@ export default function MessagesTab({ socket }: { socket: any }) {
       </div>
 
       {/* Main Chat Area */}
-      <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: 'rgba(0,0,0,0.02)' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: 'transparent' }}>
         
         {/* Thread Header */}
-        <div style={{ padding: '16px 24px', borderBottom: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', gap: '12px', background: 'rgba(255,255,255,0.01)' }}>
-          <div style={{ width: '36px', height: '36px', borderRadius: 'var(--radius-round)', background: 'var(--bg-tertiary)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--border-color)' }}>
-            <User size={16} color="var(--text-secondary)" />
+        <div style={{ padding: '16px 24px', borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', gap: '12px', background: 'rgba(255,255,255,0.01)' }}>
+          <div style={{ width: '36px', height: '36px', borderRadius: 'var(--radius-round)', background: 'rgba(255,255,255,0.03)', display: 'flex', alignItems: 'center', justifyCenter: 'center', border: '1px solid rgba(255,255,255,0.06)' }}>
+            <User size={14} color="var(--text-secondary)" />
           </div>
           <div>
-            <h3 style={{ fontSize: '1rem', fontWeight: 600 }}>
+            <h3 style={{ fontSize: '0.95rem', fontWeight: 700, fontFamily: 'Outfit' }}>
               {activeConversationId 
                 ? conversations.find((c) => c.id === activeConversationId)?.externalNumber 
                 : newContactNumber || 'Select a chat'}
             </h3>
             {activeConversationId && (
-              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+              <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
                 Line: {conversations.find((c) => c.id === activeConversationId)?.phoneNumber?.friendlyName}
               </span>
             )}
@@ -282,11 +292,11 @@ export default function MessagesTab({ socket }: { socket: any }) {
         <div style={{ flex: 1, padding: '24px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '16px' }}>
           {isLoadingMessages ? (
             <div style={{ display: 'flex', justifyContent: 'center', marginTop: '32px' }}>
-              <Loader2 className="animate-spin" size={24} color="var(--accent-primary)" />
+              <Loader2 className="animate-spin" size={20} color="var(--accent-secondary)" />
             </div>
           ) : messages.length === 0 ? (
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-              <MessageSquare size={36} color="var(--text-muted)" style={{ marginBottom: '12px', opacity: 0.5 }} />
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+              <MessageSquare size={28} color="var(--text-muted)" style={{ marginBottom: '12px', opacity: 0.4 }} />
               Type a message below to start the conversation
             </div>
           ) : (
@@ -308,16 +318,16 @@ export default function MessagesTab({ socket }: { socket: any }) {
                     borderRadius: 'var(--radius-md)',
                     borderTopRightRadius: isOutbound ? '2px' : 'var(--radius-md)',
                     borderTopLeftRadius: isOutbound ? 'var(--radius-md)' : '2px',
-                    background: isOutbound ? 'var(--accent-gradient)' : 'var(--bg-tertiary)',
+                    background: isOutbound ? 'var(--accent-gradient)' : 'rgba(255,255,255,0.02)',
                     color: '#fff',
                     fontSize: '0.9rem',
-                    border: isOutbound ? 'none' : '1px solid var(--border-color)',
-                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                    border: isOutbound ? 'none' : '1px solid rgba(255,255,255,0.04)',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
                   }}>
                     {msg.body}
                   </div>
                   
-                  <div style={{ display: 'flex', gap: '6px', fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                  <div style={{ display: 'flex', gap: '6px', fontSize: '0.65rem', color: 'var(--text-muted)', marginTop: '4px' }}>
                     <span>{new Date(msg.createdAt).toLocaleTimeString()}</span>
                     {isOutbound && (
                       <span style={{ 
@@ -336,7 +346,7 @@ export default function MessagesTab({ socket }: { socket: any }) {
         </div>
 
         {/* Message Input Composer */}
-        <form onSubmit={handleSend} style={{ padding: '20px', borderTop: '1px solid var(--border-color)', background: 'rgba(0,0,0,0.1)', display: 'flex', gap: '12px' }}>
+        <form onSubmit={handleSend} style={{ padding: '20px', borderTop: '1px solid rgba(255,255,255,0.06)', background: 'transparent', display: 'flex', gap: '12px' }}>
           <input
             type="text"
             className="form-input"
@@ -345,15 +355,15 @@ export default function MessagesTab({ socket }: { socket: any }) {
             onChange={(e) => setMessageBody(e.target.value)}
             disabled={isSending || (!activeConversationId && !newContactNumber)}
             required
-            style={{ height: '48px' }}
+            style={{ height: '48px', background: 'rgba(255,255,255,0.01)', borderColor: 'rgba(255,255,255,0.05)' }}
           />
           <button 
             type="submit" 
             className="btn btn-primary" 
             disabled={isSending || !messageBody.trim() || (!activeConversationId && !newContactNumber)}
-            style={{ width: '48px', height: '48px', padding: 0 }}
+            style={{ width: '48px', height: '48px', padding: 0, background: 'var(--accent-gradient)' }}
           >
-            {isSending ? <Loader2 className="animate-spin" size={18} /> : <Send size={18} />}
+            {isSending ? <Loader2 className="animate-spin" size={16} /> : <Send size={16} />}
           </button>
         </form>
 

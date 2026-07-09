@@ -154,10 +154,10 @@ export default function DialerTab({ socket }: { socket: any }) {
   };
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '32px', height: '100%', padding: '24px' }}>
+    <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '20px', height: '100%', padding: '24px' }}>
       
       {/* Dialer Control Center */}
-      <div className="glass-panel" style={{ padding: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
         
         {/* Microphone permission warning */}
         {micPermission === 'denied' && (
@@ -166,8 +166,8 @@ export default function DialerTab({ socket }: { socket: any }) {
             maxWidth: '320px',
             marginBottom: '20px',
             padding: '12px 16px',
-            background: 'rgba(239, 68, 68, 0.12)',
-            border: '1px solid rgba(239, 68, 68, 0.4)',
+            background: 'rgba(239, 68, 68, 0.08)',
+            border: '1px solid rgba(239, 68, 68, 0.2)',
             borderRadius: 'var(--radius-sm)',
             fontSize: '0.82rem',
             color: '#f87171',
@@ -175,14 +175,14 @@ export default function DialerTab({ socket }: { socket: any }) {
             lineHeight: '1.5'
           }}>
             🎙️ <strong>Microphone access denied.</strong><br />
-            Please click the 🔒 lock icon in your browser address bar and allow microphone access, then refresh the page.
+            Please click the lock icon in your browser address bar and allow microphone access, then refresh the page.
           </div>
         )}
         
         {/* Caller ID selector */}
         <div style={{ width: '100%', maxWidth: '280px', marginBottom: '24px' }}>
-          <label htmlFor="caller-id-select" style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '8px', textAlign: 'center' }}>
-            Outbound Caller ID (Your purchased numbers)
+          <label htmlFor="caller-id-select" style={{ display: 'block', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-secondary)', marginBottom: '8px', textAlign: 'center' }}>
+            Outbound Caller ID
           </label>
           <select 
             id="caller-id-select"
@@ -191,7 +191,7 @@ export default function DialerTab({ socket }: { socket: any }) {
             value={selectedNumberId} 
             onChange={(e) => setSelectedNumberId(e.target.value)}
             disabled={activeCall !== null}
-            style={{ textAlign: 'center' }}
+            style={{ textAlign: 'center', background: 'rgba(255, 255, 255, 0.02)', borderColor: 'rgba(255, 255, 255, 0.05)' }}
           >
             {ownedNumbers.length === 0 ? (
               <option value="">No numbers purchased</option>
@@ -205,72 +205,137 @@ export default function DialerTab({ socket }: { socket: any }) {
 
         {/* Status indicator */}
         {isConnecting && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--accent-primary)', fontSize: '0.85rem', marginBottom: '16px' }}>
-            <Loader2 className="animate-spin" size={16} />
-            Connecting to Telnyx WebRTC Gateway...
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--accent-secondary)', fontSize: '0.8rem', marginBottom: '16px', fontWeight: 500 }}>
+            <Loader2 className="animate-spin" size={14} />
+            Connecting WebRTC Gateway...
           </div>
         )}
 
         {/* Dial Display */}
-        <div style={{ width: '100%', maxWidth: '280px', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '24px' }}>
+        <div style={{ width: '100%', maxWidth: '280px', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '28px' }}>
           <input
             type="text"
             className="form-input"
             value={dialNumber}
             onChange={(e) => setDialNumber(e.target.value)}
-            placeholder="Enter destination phone number"
+            placeholder="Enter phone number"
             disabled={activeCall !== null}
-            style={{ textAlign: 'center', fontSize: '1.25rem', letterSpacing: '0.05em', height: '54px' }}
+            style={{ 
+              textAlign: 'center', 
+              fontSize: '1.4rem', 
+              letterSpacing: '0.08em', 
+              height: '56px',
+              fontWeight: 700,
+              background: 'transparent',
+              border: 'none',
+              borderBottom: '2px solid rgba(255,255,255,0.06)',
+              borderRadius: 0,
+              padding: '0 8px'
+            }}
           />
           {!activeCall && dialNumber && (
-            <button className="btn btn-secondary" onClick={clearNumber} style={{ height: '54px' }}>Clear</button>
+            <button 
+              className="btn btn-secondary" 
+              onClick={clearNumber} 
+              style={{ height: '40px', padding: '0 12px', fontSize: '0.8rem', borderRadius: 'var(--radius-sm)' }}
+            >
+              Clear
+            </button>
           )}
         </div>
 
         {/* Active Call UI or Keypad */}
         {activeCall ? (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px', padding: '24px', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.01)', width: '100%', maxWidth: '320px' }}>
-            <div style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.15em', color: activeCall.status === 'CONNECTED' ? 'var(--color-success)' : 'var(--color-warning)' }}>
-              {activeCall.status} ({activeCall.direction})
+          <div className="glass-panel" style={{ 
+            display: 'flex', 
+            flexDirection: 'column', 
+            alignItems: 'center', 
+            gap: '24px', 
+            padding: '32px 24px', 
+            width: '100%', 
+            maxWidth: '300px',
+            textAlign: 'center',
+            boxShadow: '0 12px 40px rgba(0, 0, 0, 0.4)'
+          }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'center' }}>
+              <div style={{ 
+                fontSize: '0.7rem', 
+                textTransform: 'uppercase', 
+                letterSpacing: '0.2em', 
+                fontWeight: 700,
+                color: activeCall.status === 'CONNECTED' ? 'var(--color-success)' : 'var(--color-warning)',
+                background: activeCall.status === 'CONNECTED' ? 'rgba(16, 185, 129, 0.08)' : 'rgba(245, 158, 11, 0.08)',
+                padding: '4px 10px',
+                borderRadius: 'var(--radius-sm)'
+              }}>
+                {activeCall.status === 'CONNECTED' ? 'In Call' : 'Connecting...'}
+              </div>
+              <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: '6px' }}>
+                {activeCall.direction} LINE
+              </div>
             </div>
             
-            <div style={{ fontSize: '1.5rem', fontWeight: 600 }}>{activeCall.phoneNumber}</div>
+            <div style={{ fontSize: '1.6rem', fontWeight: 800, fontFamily: 'Outfit', color: 'var(--text-primary)' }}>
+              {activeCall.phoneNumber}
+            </div>
+
+            {/* Premium Sound wave logic */}
+            {activeCall.status === 'CONNECTED' && (
+              <div className="audio-wave">
+                <div className="audio-bar"></div>
+                <div className="audio-bar"></div>
+                <div className="audio-bar"></div>
+                <div className="audio-bar"></div>
+                <div className="audio-bar"></div>
+              </div>
+            )}
             
             {/* Call State Controls */}
             {activeCall.status === 'RINGING' && activeCall.direction === 'INBOUND' ? (
-              <div style={{ display: 'flex', gap: '16px' }}>
-                <button className="btn btn-primary" onClick={answer} style={{ background: 'var(--color-success)', width: '100px' }}>
-                  <Phone size={18} /> Answer
+              <div style={{ display: 'flex', gap: '16px', width: '100%' }}>
+                <button className="btn btn-primary" onClick={answer} style={{ background: 'var(--color-success)', flex: 1 }}>
+                  <Phone size={16} /> Answer
                 </button>
-                <button className="btn btn-danger" onClick={hangup} style={{ width: '100px' }}>
-                  <PhoneOff size={18} /> Reject
+                <button className="btn btn-danger" onClick={hangup} style={{ flex: 1 }}>
+                  <PhoneOff size={16} /> Decline
                 </button>
               </div>
             ) : (
-              <div style={{ display: 'flex', gap: '16px' }}>
+              <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
                 <button 
-                  className="btn btn-secondary" 
+                  className="btn" 
                   onClick={toggleMute}
-                  style={{ background: isMuted ? 'rgba(239, 68, 68, 0.2)' : 'none', borderColor: isMuted ? 'var(--color-error)' : 'var(--border-color)' }}
+                  style={{ 
+                    background: isMuted ? 'rgba(239, 68, 68, 0.1)' : 'rgba(255,255,255,0.03)', 
+                    borderColor: isMuted ? 'rgba(239, 68, 68, 0.3)' : 'rgba(255,255,255,0.08)',
+                    borderRadius: 'var(--radius-round)',
+                    width: '48px',
+                    height: '48px',
+                    padding: 0
+                  }}
                 >
-                  {isMuted ? <MicOff size={20} color="var(--color-error)" /> : <Mic size={20} />}
+                  {isMuted ? <MicOff size={18} color="var(--color-error)" /> : <Mic size={18} color="var(--text-secondary)" />}
                 </button>
-                <button className="btn btn-danger" onClick={hangup} style={{ borderRadius: 'var(--radius-round)', width: '48px', height: '48px', padding: 0 }}>
-                  <PhoneOff size={20} />
+                <button 
+                  className="btn btn-danger" 
+                  onClick={hangup} 
+                  style={{ borderRadius: 'var(--radius-round)', width: '56px', height: '56px', padding: 0 }}
+                >
+                  <PhoneOff size={22} />
                 </button>
               </div>
             )}
           </div>
         ) : (
-          /* Keypad */
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%', maxWidth: '240px' }}>
+          /* Circular Hollow Dialpad */
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', width: '100%', maxWidth: '240px' }}>
             {[
               ['1', '2', '3'],
               ['4', '5', '6'],
               ['7', '8', '9'],
               ['*', '0', '#']
             ].map((row, idx) => (
-              <div key={idx} style={{ display: 'flex', gap: '12px' }}>
+              <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', gap: '20px' }}>
                 {row.map((char) => (
                   <button
                     key={char}
@@ -286,24 +351,36 @@ export default function DialerTab({ socket }: { socket: any }) {
                     onTouchEnd={() => handleButtonPressEnd(char)}
                     style={{
                       flex: 1,
-                      height: '54px',
-                      borderRadius: 'var(--radius-sm)',
-                      background: 'var(--bg-secondary)',
+                      aspectRatio: '1',
+                      height: '60px',
+                      borderRadius: 'var(--radius-round)',
+                      background: 'rgba(255, 255, 255, 0.02)',
                       color: 'var(--text-primary)',
-                      border: '1px solid var(--border-color)',
-                      fontSize: '1.2rem',
-                      fontWeight: 500,
+                      border: '1px solid rgba(255, 255, 255, 0.06)',
+                      fontSize: '1.25rem',
+                      fontWeight: 600,
                       cursor: 'pointer',
-                      transition: 'var(--transition-fast)',
+                      transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
                       display: 'flex',
                       flexDirection: 'column',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      lineHeight: '1'
+                      lineHeight: '1',
+                      boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.03)'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.borderColor = 'var(--accent-primary)';
+                      e.currentTarget.style.boxShadow = '0 0 12px var(--accent-glow)';
+                      e.currentTarget.style.transform = 'scale(1.08)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.06)';
+                      e.currentTarget.style.boxShadow = 'inset 0 1px 0 rgba(255,255,255,0.03)';
+                      e.currentTarget.style.transform = 'scale(1)';
                     }}
                   >
                     <div>{char}</div>
-                    {char === '0' && <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', marginTop: '2px' }}>+</div>}
+                    {char === '0' && <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', marginTop: '2px', fontWeight: 400 }}>+</div>}
                   </button>
                 ))}
               </div>
@@ -314,69 +391,73 @@ export default function DialerTab({ socket }: { socket: any }) {
               className="btn btn-primary" 
               onClick={handleCall}
               disabled={!dialNumber || ownedNumbers.length === 0}
-              style={{ height: '54px', marginTop: '16px', background: 'var(--color-success)' }}
+              style={{ height: '54px', marginTop: '16px', background: 'var(--accent-gradient)', fontSize: '0.95rem' }}
             >
-              <Phone size={20} /> Call Number
+              <Phone size={18} /> Initiate Connection
             </button>
           </div>
         )}
 
         {/* Developer Sandbox Controls */}
         {!activeCall && ownedNumbers.length > 0 && (
-          <div style={{ marginTop: '24px', borderTop: '1px dashed var(--border-color)', paddingTop: '20px', width: '100%', maxWidth: '280px', textAlign: 'center' }}>
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '10px' }}>Local DX Sandbox</div>
+          <div style={{ marginTop: '28px', borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '20px', width: '100%', maxWidth: '240px', textAlign: 'center' }}>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '10px' }}>DX Testing Center</div>
             <button 
               className="btn btn-secondary" 
-              style={{ fontSize: '0.8rem', padding: '6px 12px' }}
+              style={{ fontSize: '0.8rem', padding: '6px 16px', background: 'transparent', borderColor: 'rgba(255,255,255,0.1)' }}
               onClick={() => triggerMockInboundCall('+15559998888')}
             >
-              Simulate Inbound Call
+              Simulate Inbound
             </button>
           </div>
         )}
       </div>
 
       {/* Right Column: Call History & Webhook Logs */}
-      <div className="glass-panel" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px', height: '100%' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--border-color)', paddingBottom: '12px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', height: '100%', borderLeft: '1px solid rgba(255,255,255,0.06)', paddingLeft: '24px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '12px' }}>
           <div style={{ display: 'flex', gap: '8px' }}>
             <button 
               onClick={() => setRightTab('history')}
               style={{
                 background: 'none',
                 border: 'none',
-                color: rightTab === 'history' ? 'var(--accent-primary)' : 'var(--text-secondary)',
-                fontWeight: 600,
-                fontSize: '1rem',
+                color: rightTab === 'history' ? 'var(--text-primary)' : 'var(--text-muted)',
+                fontWeight: 700,
+                fontFamily: 'Outfit',
+                fontSize: '0.95rem',
                 cursor: 'pointer',
                 padding: '4px 8px',
-                borderBottom: rightTab === 'history' ? '2px solid var(--accent-primary)' : 'none',
+                borderBottom: rightTab === 'history' ? '2px solid var(--accent-secondary)' : '2px solid transparent',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '6px'
+                gap: '6px',
+                transition: 'var(--transition-fast)'
               }}
             >
               <History size={16} />
-              Call History
+              Logs
             </button>
             <button 
               onClick={() => setRightTab('webhooks')}
               style={{
                 background: 'none',
                 border: 'none',
-                color: rightTab === 'webhooks' ? 'var(--accent-primary)' : 'var(--text-secondary)',
-                fontWeight: 600,
-                fontSize: '1rem',
+                color: rightTab === 'webhooks' ? 'var(--text-primary)' : 'var(--text-muted)',
+                fontWeight: 700,
+                fontFamily: 'Outfit',
+                fontSize: '0.95rem',
                 cursor: 'pointer',
                 padding: '4px 8px',
-                borderBottom: rightTab === 'webhooks' ? '2px solid var(--accent-primary)' : 'none',
+                borderBottom: rightTab === 'webhooks' ? '2px solid var(--accent-secondary)' : '2px solid transparent',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '6px'
+                gap: '6px',
+                transition: 'var(--transition-fast)'
               }}
             >
               <Volume2 size={16} />
-              Real-time Logs
+              Telemetry
             </button>
           </div>
           {rightTab === 'history' && (
@@ -387,7 +468,7 @@ export default function DialerTab({ socket }: { socket: any }) {
               style={{
                 background: 'none',
                 border: 'none',
-                color: 'var(--text-secondary)',
+                color: 'var(--text-muted)',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
@@ -399,21 +480,20 @@ export default function DialerTab({ socket }: { socket: any }) {
           )}
         </div>
 
-        <div style={{ flex: 1, overflowY: 'auto' }}>
+        <div style={{ flex: 1, overflowY: 'auto', paddingRight: '4px' }}>
           {rightTab === 'history' ? (
             isLoadingHistory && callHistory.length === 0 ? (
               <div style={{ display: 'flex', justifyContent: 'center', padding: '24px', color: 'var(--text-muted)' }}>
-                <Loader2 className="animate-spin" size={24} />
+                <Loader2 className="animate-spin" size={20} />
               </div>
             ) : callHistory.length === 0 ? (
-              <div style={{ padding: '24px 16px', color: 'var(--text-muted)', fontSize: '0.85rem', textAlign: 'center', lineHeight: '1.8' }}>
-                <div style={{ fontSize: '2rem', marginBottom: '8px' }}>📋</div>
-                <div style={{ fontWeight: 600, marginBottom: '4px', color: 'var(--text-secondary)' }}>No calls yet</div>
-                <div>Calls appear here after they end.<br />
-                History refreshes automatically after each call.</div>
+              <div style={{ padding: '36px 16px', color: 'var(--text-muted)', fontSize: '0.8rem', textAlign: 'center', lineHeight: '1.8' }}>
+                <div style={{ fontSize: '1.5rem', marginBottom: '8px' }}>⚡</div>
+                <div style={{ fontWeight: 600, marginBottom: '4px', color: 'var(--text-secondary)' }}>No call sessions</div>
+                <div>Outbound and inbound session records will register here.</div>
               </div>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 {callHistory.map((call) => {
                   const isOutbound = call.direction === 'OUTBOUND';
                   const displayNum = isOutbound ? call.toNumber : call.fromNumber;
@@ -430,59 +510,60 @@ export default function DialerTab({ socket }: { socket: any }) {
                         display: 'flex', 
                         alignItems: 'center', 
                         justifyContent: 'space-between', 
-                        padding: '12px 16px', 
-                        background: 'rgba(255,255,255,0.02)', 
-                        border: '1px solid var(--border-color)', 
+                        padding: '12px 14px', 
+                        background: 'rgba(255,255,255,0.01)', 
+                        border: '1px solid rgba(255,255,255,0.04)', 
                         borderRadius: 'var(--radius-sm)',
                         transition: 'var(--transition-fast)'
                       }}
+                      onMouseEnter={(e) => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'}
+                      onMouseLeave={(e) => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.04)'}
                     >
                       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                         <div style={{
-                          width: '32px',
-                          height: '32px',
+                          width: '8px',
+                          height: '8px',
                           borderRadius: 'var(--radius-round)',
-                          background: isOutbound ? 'rgba(59, 130, 246, 0.1)' : 'rgba(16, 185, 129, 0.1)',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          color: isOutbound ? 'var(--color-info)' : 'var(--color-success)'
-                        }}>
-                          {isOutbound ? <ArrowUpRight size={16} /> : <ArrowDownLeft size={16} />}
-                        </div>
+                          background: isOutbound ? 'var(--accent-secondary)' : 'var(--color-success)',
+                          boxShadow: isOutbound ? '0 0 6px var(--accent-secondary)' : '0 0 6px var(--color-success)'
+                        }} />
                         <div>
-                          <div style={{ fontWeight: 600, fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <div style={{ fontWeight: 600, fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-primary)' }}>
                             {displayNum}
                             <button 
                               onClick={() => setDialNumber(displayNum)}
                               style={{
                                 background: 'none',
                                 border: 'none',
-                                color: 'var(--accent-primary)',
+                                color: 'var(--accent-secondary)',
                                 cursor: 'pointer',
                                 padding: '2px',
-                                display: 'inline-flex'
+                                display: 'inline-flex',
+                                opacity: 0.6,
+                                transition: 'opacity 0.2s'
                               }}
+                              onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+                              onMouseLeave={(e) => e.currentTarget.style.opacity = '0.6'}
                               title="Click to dial"
                             >
-                              <Phone size={12} />
+                              <Phone size={11} />
                             </button>
                           </div>
-                          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{dateStr}</div>
+                          <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '2px' }}>{dateStr}</div>
                         </div>
                       </div>
                       <div style={{ textAlign: 'right' }}>
                         <div style={{
-                          fontSize: '0.75rem',
+                          fontSize: '0.72rem',
                           fontWeight: 600,
-                          color: call.status === 'COMPLETED' ? 'var(--text-secondary)' : 
+                          color: call.status === 'COMPLETED' ? 'var(--text-muted)' : 
                                  call.status === 'MISSED' ? 'var(--color-error)' : 
                                  call.status === 'CONNECTED' ? 'var(--color-success)' : 'var(--color-warning)'
                         }}>
                           {call.status}
                         </div>
                         {call.durationSeconds !== null && (
-                          <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                          <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', marginTop: '2px' }}>
                             {call.durationSeconds >= 60 ? `${Math.floor(call.durationSeconds / 60)}m ${call.durationSeconds % 60}s` : `${call.durationSeconds}s`}
                           </div>
                         )}
@@ -494,19 +575,19 @@ export default function DialerTab({ socket }: { socket: any }) {
             )
           ) : (
             <div style={{
-              fontFamily: 'monospace',
-              fontSize: '0.8rem',
+              fontFamily: 'JetBrains Mono, monospace',
+              fontSize: '0.75rem',
               padding: '16px',
-              background: 'rgba(0,0,0,0.3)',
-              border: '1px solid var(--border-color)',
+              background: 'rgba(0,0,0,0.2)',
+              border: '1px solid rgba(255,255,255,0.04)',
               borderRadius: 'var(--radius-sm)',
-              color: 'var(--color-success)',
+              color: 'var(--accent-secondary)',
               lineHeight: '1.6',
               height: '350px',
               overflowY: 'auto'
             }}>
               {realTimeWebhookLogs.length === 0 ? (
-                <div style={{ color: 'var(--text-muted)' }}>Waiting for call actions or webhook events...</div>
+                <div style={{ color: 'var(--text-muted)' }}>Waiting for call telemetry events...</div>
               ) : (
                 realTimeWebhookLogs.map((log, idx) => (
                   <div key={idx} style={{ marginBottom: '8px', borderBottom: '1px solid rgba(255,255,255,0.02)', paddingBottom: '4px' }}>

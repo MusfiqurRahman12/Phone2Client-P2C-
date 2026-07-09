@@ -117,23 +117,23 @@ export default function NumbersTab() {
   };
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px', height: '100%', overflowY: 'auto', padding: '24px' }}>
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', height: '100%', overflowY: 'auto', padding: '24px' }}>
       
       {/* Left Column: Search & Buy */}
-      <div className="glass-panel" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-        <h2 style={{ fontSize: '1.25rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <Search size={20} color="var(--accent-primary)" />
-          Search & Buy Numbers
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <h2 style={{ fontSize: '1.15rem', fontWeight: 700, fontFamily: 'Outfit', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-primary)' }}>
+          <Search size={18} color="var(--accent-primary)" />
+          Provision Numbers
         </h2>
         
-        <form onSubmit={handleSearch} style={{ display: 'flex', gap: '16px', alignItems: 'flex-end' }}>
+        <form onSubmit={handleSearch} style={{ display: 'flex', gap: '12px', alignItems: 'flex-end' }}>
           <div style={{ flex: 1 }}>
-            <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '6px' }}>Number Type</label>
+            <label style={{ display: 'block', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-secondary)', marginBottom: '6px' }}>Number Type</label>
             <select 
               className="form-input" 
               value={numType} 
               onChange={(e: any) => setNumType(e.target.value)}
-              style={{ background: 'var(--bg-tertiary)', border: '1px solid var(--border-color)', height: '45px' }}
+              style={{ background: 'rgba(255,255,255,0.01)', borderColor: 'rgba(255,255,255,0.05)', height: '42px', fontSize: '0.85rem' }}
             >
               <option value="local">Local (US)</option>
               <option value="toll_free">Toll-Free</option>
@@ -141,7 +141,7 @@ export default function NumbersTab() {
           </div>
 
           <div style={{ flex: 1 }}>
-            <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '6px' }}>Area Code (Optional)</label>
+            <label style={{ display: 'block', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-secondary)', marginBottom: '6px' }}>Area Code</label>
             <input
               type="text"
               placeholder="e.g. 415"
@@ -149,38 +149,52 @@ export default function NumbersTab() {
               value={areaCode}
               onChange={(e) => setAreaCode(e.target.value)}
               maxLength={3}
-              style={{ height: '45px' }}
+              style={{ height: '42px', fontSize: '0.85rem', background: 'rgba(255,255,255,0.01)', borderColor: 'rgba(255,255,255,0.05)' }}
             />
           </div>
 
-          <button type="submit" className="btn btn-primary" style={{ height: '45px', padding: '0 24px' }} disabled={isSearching}>
-            {isSearching ? <Loader2 className="animate-spin" size={18} /> : 'Search'}
+          <button type="submit" className="btn btn-primary" style={{ height: '42px', padding: '0 20px', fontSize: '0.85rem' }} disabled={isSearching}>
+            {isSearching ? <Loader2 className="animate-spin" size={14} /> : 'Search'}
           </button>
         </form>
 
         {/* Results */}
-        <div style={{ flex: 1, minHeight: '300px', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)', overflowY: 'auto', background: 'rgba(0,0,0,0.2)' }}>
+        <div style={{ flex: 1, minHeight: '300px', overflowY: 'auto' }}>
           {searchResults.length === 0 ? (
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', color: 'var(--text-muted)', fontSize: '0.8rem', border: '1px dashed rgba(255,255,255,0.04)', borderRadius: 'var(--radius-sm)' }}>
               Search for available numbers above
             </div>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               {searchResults.map((item) => (
-                <div key={item.number} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px', borderBottom: '1px solid var(--border-color)' }}>
+                <div 
+                  key={item.number} 
+                  style={{ 
+                    display: 'flex', 
+                    justifyContent: 'space-between', 
+                    alignItems: 'center', 
+                    padding: '14px 16px', 
+                    background: 'rgba(255,255,255,0.01)', 
+                    border: '1px solid rgba(255,255,255,0.04)', 
+                    borderRadius: 'var(--radius-sm)',
+                    transition: 'var(--transition-fast)'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'}
+                  onMouseLeave={(e) => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.04)'}
+                >
                   <div>
-                    <div style={{ fontWeight: 600, fontSize: '1rem' }}>{item.friendlyName}</div>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'flex', gap: '8px', marginTop: '4px' }}>
-                      <span>Voice</span> • <span>SMS</span>
+                    <div style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--text-primary)' }}>{item.friendlyName}</div>
+                    <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'flex', gap: '6px', marginTop: '4px' }}>
+                      <span style={{ color: 'var(--accent-secondary)' }}>Voice</span> • <span style={{ color: 'var(--accent-secondary)' }}>SMS</span>
                     </div>
                   </div>
                   <button 
                     className="btn btn-primary" 
-                    style={{ padding: '6px 12px', fontSize: '0.8rem' }}
+                    style={{ padding: '6px 14px', fontSize: '0.75rem', background: 'var(--accent-gradient)' }}
                     onClick={() => handlePurchase(item.number)}
                     disabled={isPurchasing !== null}
                   >
-                    {isPurchasing === item.number ? <Loader2 className="animate-spin" size={14} /> : 'Purchase'}
+                    {isPurchasing === item.number ? <Loader2 className="animate-spin" size={12} /> : 'Purchase'}
                   </button>
                 </div>
               ))}
@@ -190,88 +204,113 @@ export default function NumbersTab() {
       </div>
 
       {/* Right Column: Owned Numbers */}
-      <div className="glass-panel" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-        <h2 style={{ fontSize: '1.25rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <PhoneCall size={20} color="var(--accent-secondary)" />
-          Active Workspace Numbers
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', borderLeft: '1px solid rgba(255,255,255,0.06)', paddingLeft: '24px' }}>
+        <h2 style={{ fontSize: '1.15rem', fontWeight: 700, fontFamily: 'Outfit', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-primary)' }}>
+          <PhoneCall size={18} color="var(--accent-secondary)" />
+          Active Numbers
         </h2>
 
         {assigningNumberId && (
-          <form onSubmit={handleAssign} className="glass-panel" style={{ padding: '16px', background: 'var(--bg-tertiary)', border: '1px solid var(--accent-primary)' }}>
-            <h3 style={{ fontSize: '0.9rem', marginBottom: '12px' }}>Assign Phone Line to Member</h3>
-            <div style={{ display: 'flex', gap: '12px' }}>
+          <form onSubmit={handleAssign} className="glass-panel" style={{ padding: '16px', border: '1px solid var(--accent-primary)', marginBottom: '12px' }}>
+            <h3 style={{ fontSize: '0.85rem', fontWeight: 700, marginBottom: '12px', color: 'var(--text-primary)' }}>Assign Phone Line to Member</h3>
+            <div style={{ display: 'flex', gap: '10px' }}>
               <select 
                 className="form-input"
                 value={selectedMemberId} 
                 onChange={(e) => setSelectedMemberId(e.target.value)}
                 required
+                style={{ fontSize: '0.85rem', background: 'rgba(255,255,255,0.02)', borderColor: 'rgba(255,255,255,0.08)' }}
               >
                 <option value="">Select a member...</option>
                 {members.map((m) => (
                   <option key={m.id} value={m.id}>{m.firstName} {m.lastName} ({m.email})</option>
                 ))}
               </select>
-              <button type="submit" className="btn btn-primary">Assign</button>
-              <button type="button" className="btn btn-secondary" onClick={() => setAssigningNumberId(null)}>Cancel</button>
+              <button type="submit" className="btn btn-primary" style={{ padding: '0 16px', fontSize: '0.8rem' }}>Assign</button>
+              <button type="button" className="btn btn-secondary" style={{ padding: '0 16px', fontSize: '0.8rem' }} onClick={() => setAssigningNumberId(null)}>Cancel</button>
             </div>
           </form>
         )}
 
-        <div style={{ flex: 1, border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)', overflowY: 'auto', background: 'rgba(0,0,0,0.2)' }}>
+        <div style={{ flex: 1, overflowY: 'auto' }}>
           {isLoadingOwned ? (
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-              <Loader2 className="animate-spin" size={24} color="var(--accent-primary)" />
+              <Loader2 className="animate-spin" size={20} color="var(--accent-secondary)" />
             </div>
           ) : ownedNumbers.length === 0 ? (
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', color: 'var(--text-muted)', fontSize: '0.8rem', border: '1px dashed rgba(255,255,255,0.04)', borderRadius: 'var(--radius-sm)' }}>
               No numbers purchased yet.
             </div>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               {ownedNumbers.map((num) => (
-                <div key={num.id} style={{ padding: '20px', borderBottom: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div 
+                  key={num.id} 
+                  style={{ 
+                    padding: '16px', 
+                    background: 'rgba(255,255,255,0.01)', 
+                    border: '1px solid rgba(255,255,255,0.04)', 
+                    borderRadius: 'var(--radius-sm)', 
+                    display: 'flex', 
+                    flexDirection: 'column', 
+                    gap: '12px',
+                    transition: 'var(--transition-fast)'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'}
+                  onMouseLeave={(e) => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.04)'}
+                >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div>
-                      <div style={{ fontWeight: 600, fontSize: '1.1rem' }}>{num.number}</div>
-                      <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{num.friendlyName} ({num.type})</div>
+                      <div style={{ fontWeight: 750, fontSize: '1.05rem', color: 'var(--text-primary)', fontFamily: 'Outfit' }}>{num.number}</div>
+                      <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '2px' }}>{num.friendlyName} ({num.type})</div>
                     </div>
                     
                     <div style={{ display: 'flex', gap: '8px' }}>
                       <button 
                         className="btn btn-secondary" 
-                        style={{ padding: '6px 10px' }}
+                        style={{ padding: '6px 10px', height: '34px', background: 'transparent' }}
                         title="Assign to member"
                         onClick={() => setAssigningNumberId(num.id)}
                       >
-                        <UserPlus size={16} />
+                        <UserPlus size={14} color="var(--text-secondary)" />
                       </button>
                       <button 
                         className="btn btn-danger" 
-                        style={{ padding: '6px 10px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)', color: 'var(--color-error)' }}
+                        style={{ padding: '6px 10px', height: '34px', background: 'rgba(239, 68, 68, 0.05)', border: '1px solid rgba(239, 68, 68, 0.1)', color: 'var(--color-error)' }}
                         onClick={() => handleRelease(num.id)}
                       >
-                        <Trash2 size={16} />
+                        <Trash2 size={14} />
                       </button>
                     </div>
                   </div>
 
                   {/* Assignments List */}
-                  <div style={{ background: 'rgba(255,255,255,0.02)', padding: '10px', borderRadius: 'var(--radius-sm)', border: '1px dashed var(--border-color)' }}>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '6px', fontWeight: 600 }}>Assigned Members:</div>
+                  <div style={{ background: 'rgba(255,255,255,0.01)', padding: '10px 12px', borderRadius: 'var(--radius-sm)', border: '1px dashed rgba(255,255,255,0.04)' }}>
+                    <div style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-muted)', marginBottom: '8px', fontWeight: 700 }}>Routing & Assignments</div>
                     {num.assignments.length === 0 ? (
-                      <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Unassigned (rings all members by default)</div>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Broadcast Mode (rings all workspace members)</div>
                     ) : (
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                         {num.assignments.map((asg: any) => (
                           <div 
                             key={asg.memberId} 
-                            style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'var(--bg-tertiary)', padding: '4px 8px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', fontSize: '0.8rem' }}
+                            style={{ 
+                              display: 'flex', 
+                              alignItems: 'center', 
+                              gap: '6px', 
+                              background: 'rgba(255,255,255,0.02)', 
+                              padding: '4px 8px', 
+                              borderRadius: 'var(--radius-sm)', 
+                              border: '1px solid rgba(255,255,255,0.04)', 
+                              fontSize: '0.75rem',
+                              color: 'var(--text-secondary)'
+                            }}
                           >
                             <span>{asg.member.firstName} {asg.member.lastName}</span>
                             <Trash2 
-                              size={12} 
+                              size={11} 
                               color="var(--color-error)" 
-                              style={{ cursor: 'pointer' }}
+                              style={{ cursor: 'pointer', marginLeft: '4px', opacity: 0.7 }}
                               onClick={() => {
                                 if (confirm('Remove assignment?')) {
                                   api.delete(`/phone-numbers/${num.id}/assignments/${asg.memberId}`).then(fetchOwnedNumbers);

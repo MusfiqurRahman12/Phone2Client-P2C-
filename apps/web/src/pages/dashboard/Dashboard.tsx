@@ -33,16 +33,16 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="app-container">
+    <div className="app-container" style={{ padding: '16px', gap: '16px' }}>
       
       {/* Sidebar navigation */}
-      <nav aria-label="Main navigation" style={{
+      <nav aria-label="Main navigation" className="glass-panel" style={{
         width: '260px',
-        borderRight: '1px solid var(--border-color)',
         display: 'flex',
         flexDirection: 'column',
-        background: 'var(--bg-secondary)',
-        padding: '24px 16px'
+        padding: '24px 16px',
+        height: '100%',
+        zIndex: 2,
       }}>
         
         {/* Logo */}
@@ -56,11 +56,12 @@ export default function Dashboard() {
             alignItems: 'center',
             justifyContent: 'center',
             fontWeight: 'bold',
-            color: '#fff'
+            color: '#fff',
+            boxShadow: '0 0 15px var(--accent-glow)'
           }}>
             P2C
           </div>
-          <span style={{ fontFamily: 'Outfit', fontWeight: 800, fontSize: '1.25rem' }}>Phone2Client</span>
+          <span style={{ fontFamily: 'Outfit', fontWeight: 800, fontSize: '1.25rem', letterSpacing: '-0.02em' }}>Phone2Client</span>
         </div>
 
         {/* Workspace Selector */}
@@ -72,8 +73,8 @@ export default function Dashboard() {
               onClick={() => setShowWorkspaceMenu(!showWorkspaceMenu)}
               style={{
                 width: '100%',
-                background: 'var(--bg-tertiary)',
-                border: '1px solid var(--border-color)',
+                background: 'rgba(255, 255, 255, 0.03)',
+                border: '1px solid rgba(255, 255, 255, 0.06)',
                 borderRadius: 'var(--radius-sm)',
                 padding: '12px',
                 display: 'flex',
@@ -83,11 +84,14 @@ export default function Dashboard() {
                 cursor: 'pointer',
                 fontFamily: 'inherit',
                 fontSize: '0.9rem',
-                textAlign: 'left'
+                textAlign: 'left',
+                transition: 'var(--transition-fast)'
               }}
+              onMouseEnter={(e) => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)'}
+              onMouseLeave={(e) => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)'}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <Building size={16} color="var(--accent-primary)" />
+                <Building size={16} color="var(--accent-secondary)" />
                 <span style={{ fontWeight: 550, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '140px' }}>
                   {activeWorkspace.name}
                 </span>
@@ -140,7 +144,7 @@ export default function Dashboard() {
         )}
 
         {/* Navigation Tabs */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', flex: 1 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1 }}>
           <button
             onClick={() => setActiveTab('dialer')}
             style={{
@@ -150,7 +154,8 @@ export default function Dashboard() {
               width: '100%',
               padding: '12px 16px',
               background: activeTab === 'dialer' ? 'var(--accent-gradient)' : 'transparent',
-              border: 'none',
+              border: '1px solid',
+              borderColor: activeTab === 'dialer' ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
               borderRadius: 'var(--radius-sm)',
               color: activeTab === 'dialer' ? '#fff' : 'var(--text-secondary)',
               cursor: 'pointer',
@@ -158,7 +163,8 @@ export default function Dashboard() {
               fontSize: '0.9rem',
               textAlign: 'left',
               fontFamily: 'inherit',
-              transition: 'var(--transition-fast)'
+              transition: 'var(--transition-fast)',
+              boxShadow: activeTab === 'dialer' ? '0 4px 12px var(--accent-glow)' : 'none'
             }}
           >
             <Phone size={18} />
@@ -174,7 +180,8 @@ export default function Dashboard() {
               width: '100%',
               padding: '12px 16px',
               background: activeTab === 'messages' ? 'var(--accent-gradient)' : 'transparent',
-              border: 'none',
+              border: '1px solid',
+              borderColor: activeTab === 'messages' ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
               borderRadius: 'var(--radius-sm)',
               color: activeTab === 'messages' ? '#fff' : 'var(--text-secondary)',
               cursor: 'pointer',
@@ -182,7 +189,8 @@ export default function Dashboard() {
               fontSize: '0.9rem',
               textAlign: 'left',
               fontFamily: 'inherit',
-              transition: 'var(--transition-fast)'
+              transition: 'var(--transition-fast)',
+              boxShadow: activeTab === 'messages' ? '0 4px 12px var(--accent-glow)' : 'none'
             }}
           >
             <MessageSquare size={18} />
@@ -198,7 +206,8 @@ export default function Dashboard() {
               width: '100%',
               padding: '12px 16px',
               background: activeTab === 'numbers' ? 'var(--accent-gradient)' : 'transparent',
-              border: 'none',
+              border: '1px solid',
+              borderColor: activeTab === 'numbers' ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
               borderRadius: 'var(--radius-sm)',
               color: activeTab === 'numbers' ? '#fff' : 'var(--text-secondary)',
               cursor: 'pointer',
@@ -206,7 +215,8 @@ export default function Dashboard() {
               fontSize: '0.9rem',
               textAlign: 'left',
               fontFamily: 'inherit',
-              transition: 'var(--transition-fast)'
+              transition: 'var(--transition-fast)',
+              boxShadow: activeTab === 'numbers' ? '0 4px 12px var(--accent-glow)' : 'none'
             }}
           >
             <Binary size={18} />
@@ -216,7 +226,7 @@ export default function Dashboard() {
 
         {/* User Card & Logout */}
         <div style={{
-          borderTop: '1px solid var(--border-color)',
+          borderTop: '1px solid rgba(255,255,255,0.06)',
           paddingTop: '20px',
           display: 'flex',
           flexDirection: 'column',
@@ -227,8 +237,8 @@ export default function Dashboard() {
               width: '32px',
               height: '32px',
               borderRadius: 'var(--radius-round)',
-              background: 'var(--bg-tertiary)',
-              border: '1px solid var(--border-color)',
+              background: 'rgba(255,255,255,0.04)',
+              border: '1px solid rgba(255,255,255,0.08)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center'
@@ -264,6 +274,14 @@ export default function Dashboard() {
               fontFamily: 'inherit',
               transition: 'var(--transition-fast)'
             }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)';
+              e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.2)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'rgba(239, 68, 68, 0.05)';
+              e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.1)';
+            }}
           >
             <LogOut size={16} />
             <span>Sign Out</span>
@@ -273,19 +291,18 @@ export default function Dashboard() {
       </nav>
 
       {/* Main Content Area */}
-      <main style={{ flex: 1, height: '100%', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+      <div style={{ flex: 1, height: '100%', display: 'flex', flexDirection: 'column', gap: '16px', zIndex: 2 }}>
         
         {/* Top Header */}
-        <div style={{
+        <header className="glass-panel" style={{
           height: '70px',
-          borderBottom: '1px solid var(--border-color)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          padding: '0 32px',
-          background: 'var(--bg-secondary)'
+          padding: '0 24px',
+          width: '100%',
         }}>
-          <h1 style={{ fontSize: '1.25rem', fontWeight: 600 }}>
+          <h1 style={{ fontSize: '1.25rem', fontWeight: 700, fontFamily: 'Outfit' }}>
             {activeTab === 'dialer' && 'Keypad Dialer'}
             {activeTab === 'messages' && 'SMS Messaging'}
             {activeTab === 'numbers' && 'Number Management'}
@@ -293,27 +310,29 @@ export default function Dashboard() {
           
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
             <div style={{
-              fontSize: '0.8rem',
-              background: 'rgba(99, 102, 241, 0.1)',
-              border: '1px solid rgba(99, 102, 241, 0.2)',
-              color: 'var(--accent-primary)',
-              padding: '4px 10px',
+              fontSize: '0.75rem',
+              background: 'rgba(6, 182, 212, 0.08)',
+              border: '1px solid rgba(6, 182, 212, 0.15)',
+              color: 'var(--accent-secondary)',
+              padding: '6px 12px',
               borderRadius: 'var(--radius-sm)',
-              fontWeight: 600
+              fontWeight: 600,
+              letterSpacing: '0.02em',
+              textTransform: 'uppercase'
             }}>
-              Tenant Mode: Row-Level Isolation (Active)
+              Tenant Mode: Row-Level Isolation
             </div>
           </div>
-        </div>
+        </header>
 
         {/* Tab Render Box */}
-        <div style={{ flex: 1, overflow: 'hidden' }}>
+        <main className="glass-panel" style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
           {activeTab === 'dialer' && <DialerTab socket={socket} />}
           {activeTab === 'messages' && <MessagesTab socket={socket} />}
           {activeTab === 'numbers' && <NumbersTab />}
-        </div>
+        </main>
 
-      </main>
+      </div>
 
     </div>
   );
