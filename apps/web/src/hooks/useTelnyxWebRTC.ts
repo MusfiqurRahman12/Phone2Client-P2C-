@@ -68,21 +68,37 @@ export function useTelnyxWebRTC(onCallEnded?: () => void) {
 
         if (!active) return;
 
-        const rtcClient = new TelnyxRTC({
-          login_token: data.token,
-        });
+        // Determine credential type: sip:user:pass or JWT login_token
+        let rtcClient: any;
+        if (data.token.startsWith('sip:')) {
+          // Format: sip:username:password (SIP credentials from Telnyx portal)
+          const parts = data.token.substring(4).split(':'); // remove "sip:" prefix
+          const sipLogin = parts[0];
+          const sipPassword = parts.slice(1).join(':'); // re-join in case password contains ':'
+          console.log(`Connecting Telnyx WebRTC with SIP credentials (user: ${sipLogin})`);
+          rtcClient = new TelnyxRTC({
+            login: sipLogin,
+            password: sipPassword,
+          });
+        } else {
+          // JWT login_token format
+          console.log('Connecting Telnyx WebRTC with login_token');
+          rtcClient = new TelnyxRTC({
+            login_token: data.token,
+          });
+        }
 
         rtcClient.on('telnyx.ready', () => {
           console.log('Telnyx WebRTC ready');
           setIsConnecting(false);
         });
 
-        rtcClient.on('telnyx.error', (error) => {
+        rtcClient.on('telnyx.error', (error: any) => {
           console.error('Telnyx WebRTC error:', error);
           setIsConnecting(false);
         });
 
-        rtcClient.on('telnyx.notification', (notification) => {
+        rtcClient.on('telnyx.notification', (notification: any) => {
           console.log('Telnyx WebRTC notification:', notification);
           
           if (notification.type === 'callUpdate') {

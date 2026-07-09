@@ -190,19 +190,51 @@ export class TelnyxService implements ITelephonyProvider {
       };
     }
 
+    // ── Option 1: Use pre-configured SIP credentials from env vars ────────
+    // Most reliable — create credentials once in Telnyx portal and store them
+    const envSipUser = process.env.TELNYX_SIP_USERNAME;
+    const envSipPass = process.env.TELNYX_SIP_PASSWORD;
+    if (envSipUser && envSipPass) {
+      this.logger.log(`Using pre-configured SIP credentials for workspace ${workspaceId}`);
+      // Encode as JSON so the frontend can extract login/password
+      return {
+        token: `sip:${envSipUser}:${envSipPass}`,
+        expiresAt: mockExpires.toISOString(),
+      };
+    }
+
+    // ── Option 2: On-demand credential creation via Telnyx API ───────────
     try {
-      // Generates an on-demand token for WebRTC client auth
       const response = await this.telnyxClient.telephonyCredentials.create({
-        name: `token_${workspaceId}_${userId}`,
+        name: `p2c_${workspaceId}_${userId}_${Date.now()}`,
       });
 
-      return {
-        token: response.data.token,
-        expiresAt: mockExpires.toISOString(), // Telnyx credentials usually valid for 1-24 hours
-      };
+      const credData = response.data;
+      this.logger.log(`Created on-demand Telnyx credential: ${credData?.id}`);
+
+      // Telnyx returns sip_username + sip_password (not a JWT token field)
+      const sipUser = credData?.sip_username;
+      const sipPass = credData?.sip_password;
+
+      if (sipUser && sipPass) {
+        return {
+          token: `sip:${sipUser}:${sipPass}`,
+          expiresAt: mockExpires.toISOString(),
+        };
+      }
+
+      // If token field exists (some API versions), use it directly
+      if (credData?.token) {
+        return {
+          token: credData.token,
+          expiresAt: mockExpires.toISOString(),
+        };
+      }
+
+      throw new Error(`Telnyx credential API returned no usable token. Response: ${JSON.stringify(credData)}`);
     } catch (error) {
-      this.logger.error(`Failed to generate WebRTC token for workspace ${workspaceId}`, error);
-      // Fallback in dev mode
+      this.logger.error(`Failed to generate WebRTC token for workspace ${workspaceId}: ${error?.message || error}`);
+      // Fall back to mock so UI stays functional
       return {
         token: `mock_sip_token_${workspaceId}_${userId}`,
         expiresAt: mockExpires.toISOString(),
