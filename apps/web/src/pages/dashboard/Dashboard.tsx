@@ -41,7 +41,7 @@ export default function Dashboard() {
         display: 'flex',
         flexDirection: 'column',
         padding: '24px 16px',
-        height: '100%',
+        height: 'calc(100vh - 32px)',
         zIndex: 2,
       }}>
         
@@ -291,7 +291,7 @@ export default function Dashboard() {
       </nav>
 
       {/* Main Content Area */}
-      <div style={{ flex: 1, height: '100%', display: 'flex', flexDirection: 'column', gap: '16px', zIndex: 2 }}>
+      <div style={{ flex: 1, height: 'calc(100vh - 32px)', display: 'flex', flexDirection: 'column', gap: '16px', zIndex: 2 }}>
         
         {/* Top Header */}
         <header className="glass-panel" style={{

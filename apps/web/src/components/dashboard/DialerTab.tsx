@@ -212,7 +212,7 @@ export default function DialerTab({ socket }: { socket: any }) {
         )}
 
         {/* Dial Display */}
-        <div style={{ width: '100%', maxWidth: '280px', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '28px' }}>
+        <div style={{ width: '100%', maxWidth: '280px', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
           <input
             type="text"
             className="form-input"
@@ -222,9 +222,9 @@ export default function DialerTab({ socket }: { socket: any }) {
             disabled={activeCall !== null}
             style={{ 
               textAlign: 'center', 
-              fontSize: '1.4rem', 
+              fontSize: '1.25rem', 
               letterSpacing: '0.08em', 
-              height: '56px',
+              height: '44px',
               fontWeight: 700,
               background: 'transparent',
               border: 'none',
@@ -328,14 +328,14 @@ export default function DialerTab({ socket }: { socket: any }) {
           </div>
         ) : (
           /* Circular Hollow Dialpad */
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', width: '100%', maxWidth: '240px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%', maxWidth: '240px' }}>
             {[
               ['1', '2', '3'],
               ['4', '5', '6'],
               ['7', '8', '9'],
               ['*', '0', '#']
             ].map((row, idx) => (
-              <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', gap: '20px' }}>
+              <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', gap: '12px' }}>
                 {row.map((char) => (
                   <button
                     key={char}
@@ -355,12 +355,12 @@ export default function DialerTab({ socket }: { socket: any }) {
                     style={{
                       flex: 1,
                       aspectRatio: '1',
-                      height: '60px',
+                      height: '50px',
                       borderRadius: 'var(--radius-round)',
                       background: 'rgba(255, 255, 255, 0.02)',
                       color: 'var(--text-primary)',
                       border: '1px solid rgba(255, 255, 255, 0.06)',
-                      fontSize: '1.25rem',
+                      fontSize: '1.15rem',
                       fontWeight: 600,
                       cursor: 'pointer',
                       transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
@@ -378,7 +378,7 @@ export default function DialerTab({ socket }: { socket: any }) {
                     }}
                   >
                     <div>{char}</div>
-                    {char === '0' && <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', marginTop: '2px', fontWeight: 400 }}>+</div>}
+                    {char === '0' && <div style={{ fontSize: '0.55rem', color: 'var(--text-muted)', marginTop: '1px', fontWeight: 400 }}>+</div>}
                   </button>
                 ))}
               </div>
@@ -389,20 +389,20 @@ export default function DialerTab({ socket }: { socket: any }) {
               className="btn btn-primary" 
               onClick={handleCall}
               disabled={!dialNumber || ownedNumbers.length === 0}
-              style={{ height: '54px', marginTop: '16px', background: 'var(--accent-gradient)', fontSize: '0.95rem' }}
+              style={{ height: '44px', marginTop: '12px', background: 'var(--accent-gradient)', fontSize: '0.9rem' }}
             >
-              <Phone size={18} /> Initiate Connection
+              <Phone size={16} /> Initiate Connection
             </button>
           </div>
         )}
 
         {/* Developer Sandbox Controls */}
         {!activeCall && ownedNumbers.length > 0 && (
-          <div style={{ marginTop: '28px', borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '20px', width: '100%', maxWidth: '240px', textAlign: 'center' }}>
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '10px' }}>DX Testing Center</div>
+          <div style={{ marginTop: '16px', borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '12px', width: '100%', maxWidth: '240px', textAlign: 'center' }}>
+            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginBottom: '8px' }}>DX Testing Center</div>
             <button 
               className="btn btn-secondary" 
-              style={{ fontSize: '0.8rem', padding: '6px 16px', background: 'transparent', borderColor: 'rgba(255,255,255,0.1)' }}
+              style={{ fontSize: '0.75rem', padding: '6px 14px', background: 'transparent', borderColor: 'rgba(255,255,255,0.1)' }}
               onClick={() => triggerMockInboundCall('+15559998888')}
             >
               Simulate Inbound
