@@ -16,6 +16,15 @@ export class WebhookProcessor extends WorkerHost {
     super();
   }
 
+  /** Normalise to E.164: ensure leading + and strip formatting */
+  private normalizeNumber(num?: string): string {
+    if (!num) return '';
+    const digits = num.replace(/[^\d]/g, '');
+    if (num.startsWith('+')) return `+${digits}`;
+    // Assume E.164 without leading + — just add it back
+    return `+${digits}`;
+  }
+
   async process(job: Job<NormalizedWebhookEvent>): Promise<any> {
     const event = job.data;
     this.logger.log(`Processing background job for webhook event: ${event.eventType} (${event.providerEventId})`);
@@ -54,19 +63,32 @@ export class WebhookProcessor extends WorkerHost {
   }
 
   private async handleCallInitiated(event: NormalizedWebhookEvent) {
-    // Check if we already have a record for this call
     if (!event.providerCallId || !event.toNumber) return;
 
-    // Lookup workspace phone number
+    const normalizedTo = this.normalizeNumber(event.toNumber);
+    const normalizedFrom = this.normalizeNumber(event.fromNumber);
+
+    // Lookup workspace phone number — try exact match then normalized
     const dbPhoneNumber = await this.prisma.phoneNumber.findFirst({
       where: {
-        number: event.toNumber,
-        status: 'ACTIVE',
+        OR: [
+          { number: event.toNumber, status: 'ACTIVE' },
+          { number: normalizedTo, status: 'ACTIVE' },
+        ],
       },
     });
 
     if (!dbPhoneNumber) {
-      this.logger.warn(`Received call event for untracked number: ${event.toNumber}`);
+      this.logger.warn(`Received call event for untracked number: ${event.toNumber} (normalized: ${normalizedTo})`);
+      return;
+    }
+
+    // Deduplicate: skip if a log for this providerCallId already exists
+    const existing = await this.prisma.callLog.findFirst({
+      where: { providerCallId: event.providerCallId },
+    });
+    if (existing) {
+      this.logger.log(`Duplicate call.initiated for ${event.providerCallId} — skipping`);
       return;
     }
 
@@ -77,11 +99,13 @@ export class WebhookProcessor extends WorkerHost {
         phoneNumber: { connect: { id: dbPhoneNumber.id } },
         direction: 'INBOUND',
         status: 'RINGING',
-        fromNumber: event.fromNumber || '',
-        toNumber: event.toNumber,
+        fromNumber: normalizedFrom || event.fromNumber || '',
+        toNumber: normalizedTo || event.toNumber,
         providerCallId: event.providerCallId,
       },
     });
+
+    this.logger.log(`Created INBOUND call log ${callLog.id} for ${normalizedFrom} → ${normalizedTo}`);
 
     // Notify workspace frontend clients in real time
     this.eventsGateway.sendToWorkspace(dbPhoneNumber.workspaceId, 'call:incoming', {

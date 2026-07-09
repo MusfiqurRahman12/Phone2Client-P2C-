@@ -11,6 +11,7 @@ import { BullModule } from '@nestjs/bullmq';
 import { WebhooksModule } from './modules/webhooks/webhooks.module';
 import { TelephonyModule } from './modules/telephony/telephony.module';
 import { MessagingModule } from './modules/messaging/messaging.module';
+import { HealthController } from './common/controllers/health.controller';
 
 @Module({
   imports: [
@@ -49,5 +50,6 @@ import { MessagingModule } from './modules/messaging/messaging.module';
     TelephonyModule,
     MessagingModule,
   ],
+  controllers: [HealthController],
 })
 export class AppModule {}

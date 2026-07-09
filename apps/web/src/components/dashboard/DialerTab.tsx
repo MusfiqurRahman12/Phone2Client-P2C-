@@ -100,6 +100,18 @@ export default function DialerTab({ socket }: { socket: any }) {
     prevActiveCallRef.current = activeCall;
   }, [activeCall, fetchCallHistory]);
 
+  // Fallback polling every 30s — catches inbound calls where Render was
+  // asleep when Telnyx fired the webhook (free-tier cold start problem)
+  useEffect(() => {
+    if (!activeWorkspace) return;
+    const interval = setInterval(() => {
+      if (!activeCall) { // don't poll during an active call
+        fetchCallHistory();
+      }
+    }, 30_000);
+    return () => clearInterval(interval);
+  }, [activeWorkspace, activeCall, fetchCallHistory]);
+
   const longPressTimer = useRef<any>(null);
   const isLongPress = useRef(false);
 
