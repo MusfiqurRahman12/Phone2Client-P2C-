@@ -411,7 +411,7 @@ export default function DialerTab({ socket, webrtc }: { socket: any; webrtc: any
       </div>
 
       {/* Right Column: Call History & Webhook Logs */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', borderLeft: '1px solid rgba(255,255,255,0.06)', paddingLeft: '24px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', borderLeft: '1px solid rgba(255,255,255,0.06)', paddingLeft: '24px', height: '100%', overflow: 'hidden' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '12px' }}>
           <div style={{ display: 'flex', gap: '8px' }}>
             <button 
