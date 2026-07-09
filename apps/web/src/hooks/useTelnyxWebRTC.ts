@@ -189,13 +189,15 @@ export function useTelnyxWebRTC(onCallEnded?: () => void) {
     }
 
     // Call API to register outbound call log
-    api.post<{ id: string }>('/calls/outbound', {
+    api.post<{ id: string; fromNumber: string }>('/calls/outbound', {
       from_number_id: fromNumberId,
       to_number: toNumber,
-    }).then(() => {
+    }).then((res) => {
       // Initiate WebRTC call through browser SDK
       const newCall = client.newCall({
         destinationNumber: toNumber,
+        callerNumber: res.fromNumber, // Pass the correct Caller ID!
+        callerName: 'P2C Outbound',
         audio: true,
         video: false,
       });
