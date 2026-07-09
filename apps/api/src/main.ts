@@ -7,6 +7,14 @@ import * as dotenv from 'dotenv';
 
 dotenv.config();
 
+// BigInt JSON serialization polyfill — Prisma returns BigInt for fields like
+// costMicrodollars, but JSON.stringify() doesn't support BigInt natively.
+// This converts BigInt values to numbers (safe for values under Number.MAX_SAFE_INTEGER).
+(BigInt.prototype as any).toJSON = function () {
+  const int = Number(this);
+  return int <= Number.MAX_SAFE_INTEGER && int >= Number.MIN_SAFE_INTEGER ? int : this.toString();
+};
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     rawBody: true,

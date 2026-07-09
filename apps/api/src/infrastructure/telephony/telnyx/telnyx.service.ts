@@ -144,9 +144,15 @@ export class TelnyxService implements ITelephonyProvider {
       };
     }
 
+    const connectionId = process.env.TELNYX_CONNECTION_ID;
+    if (!connectionId) {
+      throw new Error('TELNYX_CONNECTION_ID environment variable is not set');
+    }
+
     try {
+      this.logger.log(`Initiating Telnyx call: from=${params.from}, to=${params.to}, connection_id=${connectionId}`);
       const call = await this.telnyxClient.calls.create({
-        connection_id: process.env.TELNYX_CONNECTION_ID || '', // configured at platform level or workspace config
+        connection_id: connectionId,
         to: params.to,
         from: params.from,
         webhook_url: `${params.webhookBaseUrl}/telnyx`,
@@ -156,8 +162,11 @@ export class TelnyxService implements ITelephonyProvider {
       return {
         providerCallId: call.data.call_control_id,
       };
-    } catch (error) {
-      this.logger.error(`Failed to initiate Telnyx call from ${params.from} to ${params.to}`, error);
+    } catch (error: any) {
+      const telnyxErrors = error?.raw?.errors || error?.errors;
+      this.logger.error(
+        `Failed to initiate Telnyx call from ${params.from} to ${params.to}: ${JSON.stringify(telnyxErrors || error?.message || error)}`,
+      );
       throw error;
     }
   }
