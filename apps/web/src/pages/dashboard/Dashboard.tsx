@@ -36,7 +36,7 @@ export default function Dashboard() {
     <div className="app-container">
       
       {/* Sidebar navigation */}
-      <div style={{
+      <nav aria-label="Main navigation" style={{
         width: '260px',
         borderRight: '1px solid var(--border-color)',
         display: 'flex',
@@ -67,6 +67,8 @@ export default function Dashboard() {
         {activeWorkspace && (
           <div style={{ position: 'relative', marginBottom: '24px' }}>
             <button 
+              aria-label="Switch workspace"
+              aria-expanded={showWorkspaceMenu}
               onClick={() => setShowWorkspaceMenu(!showWorkspaceMenu)}
               style={{
                 width: '100%',
@@ -268,10 +270,10 @@ export default function Dashboard() {
           </button>
         </div>
 
-      </div>
+      </nav>
 
       {/* Main Content Area */}
-      <div style={{ flex: 1, height: '100%', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+      <main style={{ flex: 1, height: '100%', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
         
         {/* Top Header */}
         <div style={{
@@ -311,7 +313,7 @@ export default function Dashboard() {
           {activeTab === 'numbers' && <NumbersTab />}
         </div>
 
-      </div>
+      </main>
 
     </div>
   );

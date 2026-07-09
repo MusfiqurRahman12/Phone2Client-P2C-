@@ -14,7 +14,7 @@
   
   --text-primary: #f8fafc;
   --text-secondary: #94a3b8;
-  --text-muted: #64748b;
+  --text-muted: #8893a7; /* WCAG AA 4.5:1+ contrast against --bg-secondary */
   
   --border-color: rgba(255, 255, 255, 0.06);
   --border-focus: rgba(99, 102, 241, 0.4);

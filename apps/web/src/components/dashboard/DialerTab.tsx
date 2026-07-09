@@ -181,11 +181,13 @@ export default function DialerTab({ socket }: { socket: any }) {
         
         {/* Caller ID selector */}
         <div style={{ width: '100%', maxWidth: '280px', marginBottom: '24px' }}>
-          <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '8px', textAlign: 'center' }}>
+          <label htmlFor="caller-id-select" style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '8px', textAlign: 'center' }}>
             Outbound Caller ID (Your purchased numbers)
           </label>
           <select 
+            id="caller-id-select"
             className="form-input" 
+            aria-label="Select outbound caller ID number"
             value={selectedNumberId} 
             onChange={(e) => setSelectedNumberId(e.target.value)}
             disabled={activeCall !== null}
@@ -381,6 +383,7 @@ export default function DialerTab({ socket }: { socket: any }) {
             <button 
               onClick={fetchCallHistory} 
               disabled={isLoadingHistory}
+              aria-label="Refresh call history"
               style={{
                 background: 'none',
                 border: 'none',

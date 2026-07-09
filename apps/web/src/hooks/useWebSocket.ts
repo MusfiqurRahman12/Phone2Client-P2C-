@@ -30,8 +30,11 @@ export function useWebSocket(callbacks: WebSocketCallbacks = {}) {
 
     const token = localStorage.getItem('p2c_access_token');
     
-    // Connect to local dev server (proxied automatically via vite config proxy)
-    const socket = io({
+    // In production, connect to the API backend directly.
+    // In local dev, the Vite proxy handles the /socket.io path automatically.
+    const apiUrl = (import.meta as any).env.VITE_API_URL || '';
+    
+    const socket = io(apiUrl || undefined, {
       auth: { token },
       transports: ['websocket'],
     });
