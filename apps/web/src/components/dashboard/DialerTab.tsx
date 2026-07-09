@@ -5,6 +5,7 @@ import { useTelnyxWebRTC } from '../../hooks/useTelnyxWebRTC';
 import { api } from '../../services/api';
 import { Phone, PhoneOff, MicOff, Mic, Loader2, Volume2, History, ArrowUpRight, ArrowDownLeft, RefreshCw } from 'lucide-react';
 import { useAuthStore } from '../../stores/auth.store';
+import { playHaptic } from '../../utils/callSounds';
 
 export default function DialerTab({ socket }: { socket: any }) {
   const activeWorkspace = useAuthStore((state) => state.activeWorkspace);
@@ -96,6 +97,7 @@ export default function DialerTab({ socket }: { socket: any }) {
     if (char === '0') {
       longPressTimer.current = setTimeout(() => {
         isLongPress.current = true;
+        playHaptic(60); // longer buzz for long-press '+'
         setDialNumber((prev) => prev + '+');
       }, 600); // 600ms hold
     }
@@ -112,6 +114,7 @@ export default function DialerTab({ socket }: { socket: any }) {
       return;
     }
 
+    playHaptic(30); // short tap buzz
     setDialNumber((prev) => prev + char);
     if (activeCall && activeCall.status === 'CONNECTED') {
       sendDTMF(char);

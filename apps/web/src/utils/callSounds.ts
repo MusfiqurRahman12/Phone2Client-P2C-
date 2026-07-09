@@ -1,6 +1,17 @@
 // apps/web/src/utils/callSounds.ts
 // Generates all call sounds programmatically using Web Audio API (no audio files needed)
 
+/** Short haptic pulse for keypad taps — works on Android/mobile Chrome */
+export function playHaptic(durationMs = 30) {
+  try {
+    if ('vibrate' in navigator) {
+      navigator.vibrate(durationMs);
+    }
+  } catch (_) {
+    // Not supported — silently no-op
+  }
+}
+
 let audioCtx: AudioContext | null = null;
 let ringtoneInterval: ReturnType<typeof setInterval> | null = null;
 let ringbackInterval: ReturnType<typeof setInterval> | null = null;
