@@ -271,7 +271,7 @@ export default function MessagesTab({ socket }: { socket: any }) {
         
         {/* Thread Header */}
         <div style={{ padding: '16px 24px', borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', gap: '12px', background: 'rgba(255,255,255,0.01)' }}>
-          <div style={{ width: '36px', height: '36px', borderRadius: 'var(--radius-round)', background: 'rgba(255,255,255,0.03)', display: 'flex', alignItems: 'center', justifyCenter: 'center', border: '1px solid rgba(255,255,255,0.06)' }}>
+          <div style={{ width: '36px', height: '36px', borderRadius: 'var(--radius-round)', background: 'rgba(255,255,255,0.03)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(255,255,255,0.06)' }}>
             <User size={14} color="var(--text-secondary)" />
           </div>
           <div>

@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTelnyxWebRTC } from '../../hooks/useTelnyxWebRTC';
 import { api } from '../../services/api';
-import { Phone, PhoneOff, MicOff, Mic, Loader2, Volume2, History, ArrowUpRight, ArrowDownLeft, RefreshCw } from 'lucide-react';
+import { Phone, PhoneOff, MicOff, Mic, Loader2, Volume2, History, RefreshCw } from 'lucide-react';
 import { useAuthStore } from '../../stores/auth.store';
 import { playHaptic } from '../../utils/callSounds';
 
@@ -341,11 +341,14 @@ export default function DialerTab({ socket }: { socket: any }) {
                     key={char}
                     onMouseDown={() => handleButtonPressStart(char)}
                     onMouseUp={() => handleButtonPressEnd(char)}
-                    onMouseLeave={() => {
+                    onMouseLeave={(e) => {
                       if (longPressTimer.current) {
                         clearTimeout(longPressTimer.current);
                         longPressTimer.current = null;
                       }
+                      e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.06)';
+                      e.currentTarget.style.boxShadow = 'inset 0 1px 0 rgba(255,255,255,0.03)';
+                      e.currentTarget.style.transform = 'scale(1)';
                     }}
                     onTouchStart={() => handleButtonPressStart(char)}
                     onTouchEnd={() => handleButtonPressEnd(char)}
@@ -372,11 +375,6 @@ export default function DialerTab({ socket }: { socket: any }) {
                       e.currentTarget.style.borderColor = 'var(--accent-primary)';
                       e.currentTarget.style.boxShadow = '0 0 12px var(--accent-glow)';
                       e.currentTarget.style.transform = 'scale(1.08)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.06)';
-                      e.currentTarget.style.boxShadow = 'inset 0 1px 0 rgba(255,255,255,0.03)';
-                      e.currentTarget.style.transform = 'scale(1)';
                     }}
                   >
                     <div>{char}</div>
