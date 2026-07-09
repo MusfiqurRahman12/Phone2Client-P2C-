@@ -2,6 +2,14 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { api } from '../services/api';
+import {
+  startRingtone,
+  startRingback,
+  playConnectSound,
+  playHangupSound,
+  playDtmfTone,
+  stopAllSounds,
+} from '../utils/callSounds';
 
 export interface CallSession {
   id: string;
@@ -67,15 +75,26 @@ export function useTelnyxWebRTC(onCallEnded?: () => void) {
             activeCallRef.current = call;
 
             if (call.state === 'ringing') {
+              const direction = call.direction === 'inbound' ? 'INBOUND' : 'OUTBOUND';
               setActiveCall({
                 id: call.id || '',
-                direction: call.direction === 'inbound' ? 'INBOUND' : 'OUTBOUND',
+                direction,
                 status: 'RINGING',
                 phoneNumber: call.options?.remoteCallerName || call.options?.remoteCallerNumber || 'Unknown',
               });
+              // Play ringtone for inbound, ringback for outbound
+              if (direction === 'INBOUND') {
+                startRingtone();
+              } else {
+                startRingback();
+              }
             } else if (call.state === 'active') {
+              stopAllSounds();
+              playConnectSound();
               setActiveCall((prev) => prev ? { ...prev, status: 'CONNECTED' } : null);
             } else if (call.state === 'destroy') {
+              stopAllSounds();
+              playHangupSound();
               setActiveCall(null);
               activeCallRef.current = null;
               if (onCallEnded) onCallEnded();
@@ -110,6 +129,7 @@ export function useTelnyxWebRTC(onCallEnded?: () => void) {
 
     if (client.isMock) {
       // Simulate dialing
+      startRingback();
       setActiveCall({
         id: `mock_sess_${Math.random().toString(36).substring(7)}`,
         direction: 'OUTBOUND',
@@ -121,6 +141,8 @@ export function useTelnyxWebRTC(onCallEnded?: () => void) {
       setTimeout(() => {
         setActiveCall((prev) => {
           if (prev && prev.status === 'RINGING') {
+            stopAllSounds();
+            playConnectSound();
             return { ...prev, status: 'CONNECTED' };
           }
           return prev;
@@ -149,6 +171,8 @@ export function useTelnyxWebRTC(onCallEnded?: () => void) {
   // Answer Inbound Call
   const answer = () => {
     if (client?.isMock) {
+      stopAllSounds();
+      playConnectSound();
       setActiveCall((prev) => prev ? { ...prev, status: 'CONNECTED' } : null);
       return;
     }
@@ -160,6 +184,8 @@ export function useTelnyxWebRTC(onCallEnded?: () => void) {
 
   // Hangup call
   const hangup = () => {
+    stopAllSounds();
+    playHangupSound();
     if (client?.isMock) {
       setActiveCall(null);
       if (onCallEnded) onCallEnded();
@@ -190,6 +216,7 @@ export function useTelnyxWebRTC(onCallEnded?: () => void) {
   };
 
   const sendDTMF = (digit: string) => {
+    playDtmfTone();
     if (client?.isMock) {
       console.log(`Mock DTMF key sent: ${digit}`);
       return;
@@ -212,6 +239,7 @@ export function useTelnyxWebRTC(onCallEnded?: () => void) {
     // Allows triggering inbound calls in mock mode (for testing UI)
     triggerMockInboundCall: (fromNumber: string) => {
       if (client?.isMock) {
+        startRingtone();
         setActiveCall({
           id: `mock_sess_${Math.random().toString(36).substring(7)}`,
           direction: 'INBOUND',
