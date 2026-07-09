@@ -67,6 +67,10 @@ export class MessagingService {
   ) {
     const provider = await this.getProviderForWorkspace(workspaceId);
 
+    // Sanitize destination phone number to E.164 format
+    const digits = toNumber.replace(/\D/g, '');
+    const cleanToNumber = toNumber.startsWith('+') ? `+${digits}` : (digits.length === 10 ? `+1${digits}` : `+${digits}`);
+
     // Verify sender phone number
     const dbPhoneNumber = await this.prisma.phoneNumber.findFirst({
       where: {
@@ -93,7 +97,7 @@ export class MessagingService {
         workspaceId_phoneNumberId_externalNumber: {
           workspaceId,
           phoneNumberId: dbPhoneNumber.id,
-          externalNumber: toNumber,
+          externalNumber: cleanToNumber,
         },
       },
     });
@@ -103,7 +107,7 @@ export class MessagingService {
         data: {
           workspace: { connect: { id: workspaceId } },
           phoneNumber: { connect: { id: dbPhoneNumber.id } },
-          externalNumber: toNumber,
+          externalNumber: cleanToNumber,
         },
       });
     }
@@ -116,7 +120,7 @@ export class MessagingService {
         direction: 'OUTBOUND',
         status: 'QUEUED',
         fromNumber: dbPhoneNumber.number,
-        toNumber,
+        toNumber: cleanToNumber,
         body,
         sentById: memberId,
       },
@@ -126,7 +130,7 @@ export class MessagingService {
       // Trigger provider send SMS
       const result = await provider.sendSms({
         from: dbPhoneNumber.number,
-        to: toNumber,
+        to: cleanToNumber,
         body,
         workspaceId,
         messagingProfileId: dbPhoneNumber.workspace.providerConfig?.telnyxMessagingProfileId || undefined,

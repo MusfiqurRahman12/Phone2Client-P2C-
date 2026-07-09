@@ -28,6 +28,10 @@ export class CallsService {
 
   async initiateOutboundCall(workspaceId: string, fromNumberId: string, toNumber: string) {
     const provider = await this.getProviderForWorkspace(workspaceId);
+
+    // Sanitize destination phone number to E.164 format
+    const digits = toNumber.replace(/\D/g, '');
+    const cleanToNumber = toNumber.startsWith('+') ? `+${digits}` : (digits.length === 10 ? `+1${digits}` : `+${digits}`);
     
     // Verify phone number exists and belongs to workspace
     const dbPhoneNumber = await this.prisma.phoneNumber.findFirst({
@@ -52,7 +56,7 @@ export class CallsService {
         direction: 'OUTBOUND',
         status: 'INITIATED',
         fromNumber: dbPhoneNumber.number,
-        toNumber,
+        toNumber: cleanToNumber,
       },
     });
 
@@ -60,7 +64,7 @@ export class CallsService {
       // 2. Trigger outbound call in provider (which dials the destination and hooks up call control)
       const result = await provider.initiateCall({
         from: dbPhoneNumber.number,
-        to: toNumber,
+        to: cleanToNumber,
         workspaceId,
         webhookBaseUrl,
       });
