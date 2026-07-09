@@ -22,15 +22,18 @@ export default function MessagesTab({ socket }: { socket: any }) {
   const [isLoadingMessages, setIsLoadingMessages] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const lastActiveConvIdRef = useRef<string | null>(null);
 
   // Auto scroll to bottom of chat thread
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  const scrollToBottom = (smooth = true) => {
+    messagesEndRef.current?.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto' });
   };
 
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+    const isNewThread = lastActiveConvIdRef.current !== activeConversationId;
+    scrollToBottom(!isNewThread);
+    lastActiveConvIdRef.current = activeConversationId;
+  }, [messages, activeConversationId]);
 
   // Load owned numbers for sender selection
   useEffect(() => {
